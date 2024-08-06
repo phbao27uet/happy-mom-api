@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id           String   @id @default(cuid()) @map("_id") @db.ObjectId
+  username     String   @unique
+  password     String
+  role         Role
+  pinCode      String?
+  isVerified   Boolean  @default(false)
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User?
+}
+
+model User {
+  id String @id @default(cuid()) @map("_id") @db.ObjectId
+
+  accountId String  @unique @db.ObjectId
+  account   Account @relation(fields: [accountId], references: [id])
+
+  avatar     String?
+  bio        String?
+  background String?
+
+  email       String?   @unique
+  phoneNumber String?   @unique
+  fullName    String?
+  dob         DateTime?
+  gender      Gender?
+  address     String?
+  province    String?
+  district    String?
+  ward        String?
+
+  pregnancyStatus PregnancyStatus?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  childs      Child[]
+  memberships Membership[]
+  posts       Post[]
+  likes       Like[]
+  comments    Comment[]
+}
+
+model Child {
+  id        String      @id @default(cuid()) @map("_id") @db.ObjectId
+  fullName  String?
+  nickname  String?
+  status    ChildStatus @default(UNBORN) // Sử dụng enum cho trạng thái
+  birthDate DateTime?
+  dueDate   DateTime?
+  gender    Gender      @default(OTHER)
+  userId    String      @db.ObjectId
+  user      User        @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Group {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String       @unique
+  background  String? // Ảnh bìa
+  description String?
+  memberships Membership[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+}
+
+model Membership {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String @db.ObjectId
+  groupId String @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id])
+  group   Group  @relation(fields: [groupId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id       String  @id @default(cuid()) @map("_id") @db.ObjectId
+  content  String
+  imageUrl String?
+  authorId String  @db.ObjectId
+  author   User    @relation(fields: [authorId], references: [id])
+  groupId  String? @db.ObjectId
+  group    Group?  @relation(fields: [groupId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Like {
+  id     String @id @default(cuid()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+  postId String @db.ObjectId
+  post   Post   @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id        String    @id @default(cuid()) @map("_id") @db.ObjectId
+  content   String?
+  imageUrl  String?
+  postId    String    @db.ObjectId
+  post      Post      @relation(fields: [postId], references: [id])
+  authorId  String    @db.ObjectId
+  author    User      @relation(fields: [authorId], references: [id])
+  parentId  String?   @db.ObjectId
+  parent    Comment?  @relation("ParentComment", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children  Comment[] @relation("ParentComment")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum ChildStatus {
+  BORN // Đã sinh
+  UNBORN // Chưa sinh
+}
+
+enum Gender {
+  MALE // NAM
+  FEMALE // NỮ
+  OTHER // KHÁC
+}
+
+enum PregnancyStatus {
+  WISHING // Mong có thai
+  PREGNANT // Đang mang thai
+  HAS_CHILDREN // Đã có con
+  NOT_WANTING // Chưa muốn có con
+}
