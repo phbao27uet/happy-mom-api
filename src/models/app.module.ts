@@ -7,6 +7,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { AppController } from './app.controller';
 import { UsersModule } from './users/users.module';
 import { GroupsModule } from './groups/groups.module';
+import { OTPModule } from './otp/otp.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { GroupsModule } from './groups/groups.module';
     AuthModule,
     UsersModule,
     GroupsModule,
+    OTPModule,
   ],
   controllers: [AppController],
   providers: [

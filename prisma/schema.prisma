@@ -21,6 +21,7 @@ model Account {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         User?
+  otps         OTP[]
 }
 
 model User {
@@ -53,6 +54,18 @@ model User {
   posts       Post[]
   likes       Like[]
   comments    Comment[]
+}
+
+model OTP {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  code      String   @unique
+  accountId String   @db.ObjectId
+  account   Account  @relation(fields: [accountId], references: [id])
+  type      OTPType
+  expiredAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Child {
@@ -155,4 +168,8 @@ enum PregnancyStatus {
   PREGNANT // Đang mang thai
   HAS_CHILDREN // Đã có con
   NOT_WANTING // Chưa muốn có con
+}
+
+enum OTPType {
+  FORGOT_PASSWORD
 }

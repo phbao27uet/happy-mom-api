@@ -7,6 +7,8 @@ import { GetRt } from '@shared/decorators';
 import { SignUpDto } from './dto/sign-up.dto';
 import { AuthGuard } from './guards/auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password';
+import { VerifyOTPDto } from './dto/verify-otp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +22,16 @@ export class AuthController {
   @Post('logout')
   async logout(@GetCurrentId() currentId: string) {
     return this.authService.logout(currentId);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto.username);
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(@Body() verifyOtpDto: VerifyOTPDto) {
+    return this.authService.verifyOtp(verifyOtpDto.code);
   }
 
   @UseGuards(AuthGuard)

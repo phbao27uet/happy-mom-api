@@ -13,12 +13,14 @@ import { JWT_CONSTANTS } from 'src/shared/utils/constants';
 import { SignUpDto } from './dto/sign-up.dto';
 import { hashPassword, isPasswordValid } from '@shared/utils';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { OTPService } from '@models/otp/otp.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private otpService: OTPService,
   ) {}
 
   async signup(dto: SignUpDto) {
@@ -112,6 +114,27 @@ export class AuthService {
     });
 
     return true;
+  }
+
+  async forgotPassword(username: string) {
+    const account = await this.prisma.account.findUnique({
+      where: {
+        username,
+      },
+    });
+
+    if (!account) throw new BadRequestException('Tài khoản không tồn tại');
+
+    const otpRecord = await this.otpService.createOtp(account.id);
+    return otpRecord;
+  }
+
+  async verifyOtp(code: string) {
+    const res = await this.otpService.verifyOtp(code);
+
+    if (!res) throw new BadRequestException('Mã OTP không hợp lệ');
+
+    return res;
   }
 
   async logout(accountId: string): Promise<boolean> {
