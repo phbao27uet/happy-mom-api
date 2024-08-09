@@ -8,9 +8,6 @@ const SignUpSchema = z.object({
   password: z.string().trim().min(6, {
     message: 'Mật khẩu ít nhất 6 ký tự',
   }),
-  name: z.string().min(1, {
-    message: 'Tên không được để trống',
-  }),
 });
 
 export class SignUpDto extends createZodDto(SignUpSchema) {}
