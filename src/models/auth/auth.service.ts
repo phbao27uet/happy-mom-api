@@ -29,7 +29,7 @@ export class AuthService {
     });
 
     if (accountExist) {
-      throw new ForbiddenException('Tài khoản đã tồn tại');
+      throw new ForbiddenException('Email hoặc Số điện thoại đã được sử dụng');
     }
     const hash = await argon.hash(dto.password);
 
@@ -134,7 +134,12 @@ export class AuthService {
       where: {
         id: accountId,
       },
-      include: {
+
+      select: {
+        id: true,
+        username: true,
+        role: true,
+        pinCode: true,
         user: true,
       },
     });

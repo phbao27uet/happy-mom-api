@@ -30,6 +30,42 @@ async function main() {
     },
   });
 
+  await prisma.group.upsert({
+    where: {
+      name: 'Group 1',
+    },
+    update: {},
+    create: {
+      name: 'Group 1',
+      description: 'Description of Group 1',
+      background: 'https://source.unsplash.com/random',
+    },
+  });
+
+  await prisma.group.upsert({
+    where: {
+      name: 'Group 2',
+    },
+    update: {},
+    create: {
+      name: 'Group 2',
+      description: 'Description of Group 2',
+      background: 'https://source.unsplash.com/random',
+    },
+  });
+
+  await prisma.group.upsert({
+    where: {
+      name: 'Group 3',
+    },
+    update: {},
+    create: {
+      name: 'Group 3',
+      description: 'Description of Group 3',
+      background: 'https://source.unsplash.com/random',
+    },
+  });
+
   console.log('seed success');
 }
 
