@@ -19,6 +19,11 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('login-admin')
+  async loginAdmin(@Body() loginDto: CredentialsDto) {
+    return this.authService.login(loginDto, true);
+  }
+
   @Post('logout')
   async logout(@GetCurrentId() currentId: string) {
     return this.authService.logout(currentId);
