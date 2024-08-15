@@ -1,9 +1,8 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 
-const createPostSchema = z
+const updatePostSchema = z
   .object({
-    groupId: z.string().optional(),
     content: z.string().optional(),
     images: z.array(z.string()).optional(),
   })
@@ -16,4 +15,4 @@ const createPostSchema = z
     }
   });
 
-export class CreatePostDto extends createZodDto(createPostSchema) {}
+export class UpdatePostDto extends createZodDto(updatePostSchema) {}
