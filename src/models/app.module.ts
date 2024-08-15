@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { UsersModule } from './users/users.module';
 import { GroupsModule } from './groups/groups.module';
 import { OTPModule } from './otp/otp.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { OTPModule } from './otp/otp.module';
     UsersModule,
     GroupsModule,
     OTPModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
