@@ -6,7 +6,6 @@ import {
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UploadDto } from './dto';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class UploadService {
@@ -28,7 +27,7 @@ export class UploadService {
     try {
       const randomName = Math.random().toString(36).substring(7);
 
-      const key = randomName + uploadDto.fileName;
+      const key = `${randomName}-${uploadDto.fileName}`;
       const body = uploadDto.file;
 
       await this.s3Client.send(

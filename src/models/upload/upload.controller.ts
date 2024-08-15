@@ -1,16 +1,18 @@
 import {
   Controller,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  ParseFilePipe,
+  HttpStatus,
+  ParseFilePipeBuilder,
   Post,
   UploadedFile,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
+import { AuthGuard } from '@models/auth/guards/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('upload')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
@@ -19,12 +21,16 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile(
-      new ParseFilePipe({
-        // validators: [
-        //   new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // Max 10MB
-        //   new FileTypeValidator({ fileType: 'image/jpeg' }), // Accept only image
-        // ],
-      }),
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: '.(png|jpeg|jpg)',
+        })
+        .addMaxSizeValidator({
+          maxSize: 1024 * 1024 * 10,
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
     )
     file: Express.Multer.File,
   ) {
@@ -38,12 +44,16 @@ export class UploadController {
   @UseInterceptors(FilesInterceptor('files'))
   async uploadFiles(
     @UploadedFiles(
-      new ParseFilePipe({
-        validators: [
-          // new MaxFileSizeValidator({ maxSize: 1000 }),
-          // new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
-      }),
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: '.(png|jpeg|jpg)',
+        })
+        .addMaxSizeValidator({
+          maxSize: 1024 * 1024 * 10,
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
     )
     files: Array<Express.Multer.File>,
   ) {
