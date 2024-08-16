@@ -12,6 +12,7 @@ import { UploadModule } from './upload/upload.module';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { LikesModule } from './likes/likes.module';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { LikesModule } from './likes/likes.module';
     CommentsModule,
     LikesModule,
     CommentsModule,
+    SmsModule,
   ],
   controllers: [AppController],
   providers: [
