@@ -50,10 +50,11 @@ export class AuthService {
     };
   }
 
-  async login(dto: CredentialsDto) {
+  async login(dto: CredentialsDto, isAdmin = false) {
     const account = await this.prisma.account.findUnique({
       where: {
         username: dto.username,
+        role: isAdmin ? 'ADMIN' : 'USER',
       },
       select: {
         id: true,

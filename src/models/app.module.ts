@@ -9,6 +9,9 @@ import { UsersModule } from './users/users.module';
 import { GroupsModule } from './groups/groups.module';
 import { OTPModule } from './otp/otp.module';
 import { UploadModule } from './upload/upload.module';
+import { PostsModule } from './posts/posts.module';
+import { CommentsModule } from './comments/comments.module';
+import { LikesModule } from './likes/likes.module';
 
 @Module({
   imports: [
@@ -22,6 +25,10 @@ import { UploadModule } from './upload/upload.module';
     GroupsModule,
     OTPModule,
     UploadModule,
+    PostsModule,
+    CommentsModule,
+    LikesModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [
