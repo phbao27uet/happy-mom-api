@@ -14,6 +14,8 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { hashPassword, isPasswordValid } from '@shared/utils';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { OTPService } from '@models/otp/otp.service';
+import { SmsService } from '@models/sms/sms.service';
+import { isMail } from '@shared/utils';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +23,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private otpService: OTPService,
+    private smsService: SmsService,
   ) {}
 
   async signup(dto: SignUpDto) {
@@ -127,6 +130,14 @@ export class AuthService {
     if (!account) throw new BadRequestException('Tài khoản không tồn tại');
 
     const otpRecord = await this.otpService.createOtp(account.id);
+
+    if (!isMail(username)) {
+      await this.smsService.sendSms({
+        to: username,
+        content: `Mã OTP của bạn là: ${otpRecord.code}`,
+      });
+    }
+
     return otpRecord;
   }
 

@@ -4,3 +4,4 @@ export * from './hash';
 export * from './generate-slug';
 export * from './date';
 export * from './percent-transit-to-vn';
+export * from './is-mail';
