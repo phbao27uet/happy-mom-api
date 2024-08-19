@@ -30,6 +30,9 @@ model Account {
   participants Participant[]
   babyDiaries  BabyDiary[]
   alarms       Alarm[]
+  // Friend feature
+  friends      Friend[]      @relation("AccountAsSender") // Danh sách bạn bè mà mình gửi lời mời
+  friendOf     Friend[]      @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
 }
 
 model User {
@@ -59,6 +62,16 @@ model User {
 
   childs      Child[]
   memberships Membership[]
+}
+
+model Friend {
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  account   Account      @relation("AccountAsSender", fields: [accountId], references: [id])
+  accountId String       @db.ObjectId // Người gửi lời mời
+  friend    Account      @relation("AccountAsReceiver", fields: [friendId], references: [id])
+  friendId  String       @db.ObjectId // Người nhận lời mời
+  status    FriendStatus // Trạng thái kết bạn
+  createdAt DateTime     @default(now())
 }
 
 model OTP {
@@ -121,7 +134,7 @@ model Post {
   authorId String   @db.ObjectId
   author   Account  @relation(fields: [authorId], references: [id])
 
-  // 1 post có thể thuộc về 1 group hoặc không thuộc về group nào, hoặc thuộc về trang cá nhân
+  // 1 post có thể thuộc về 1 group hoặc thuộc về trang cá nhân
 
   groupId String? @db.ObjectId
   group   Group?  @relation(fields: [groupId], references: [id])
@@ -570,4 +583,10 @@ enum VaccineInjectionStatus {
   INJECTED // Đã tiêm
   NOT_INJECTED // Chưa tiêm
   SKIP // Bỏ qua
+}
+
+enum FriendStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
