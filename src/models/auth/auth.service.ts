@@ -16,6 +16,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { OTPService } from '@models/otp/otp.service';
 import { SmsService } from '@models/sms/sms.service';
 import { isMail } from '@shared/utils';
+import { omit } from 'lodash';
 
 @Injectable()
 export class AuthService {
@@ -169,17 +170,16 @@ export class AuthService {
       where: {
         id: accountId,
       },
-
-      select: {
-        id: true,
-        username: true,
-        role: true,
-        pinCode: true,
-        user: true,
+      include: {
+        user: {
+          include: {
+            childs: true,
+          },
+        },
       },
     });
 
-    return user;
+    return omit(user, ['password', 'refreshToken', 'isVerified']);
   }
 
   async refreshTokens(
