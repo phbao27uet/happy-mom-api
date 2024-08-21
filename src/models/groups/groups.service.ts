@@ -6,16 +6,12 @@ export class GroupsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getOptions() {
-    const groups = await this.prisma.group.findMany({
-      select: {
-        id: true,
-        name: true,
-      },
-    });
+    const groups = await this.prisma.group.findMany({});
 
     return groups.map((group) => ({
       value: group.id,
       label: group.name,
+      data: group,
     }));
   }
 }
