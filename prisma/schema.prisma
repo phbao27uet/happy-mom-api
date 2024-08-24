@@ -38,8 +38,8 @@ model User {
   bio        String?
   background String?
 
-  email       String?   @unique
-  phoneNumber String?   @unique
+  email       String? // @unique
+  phoneNumber String? // @unique
   fullName    String?
   dob         DateTime?
   gender      Gender?

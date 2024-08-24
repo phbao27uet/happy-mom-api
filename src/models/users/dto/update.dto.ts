@@ -1,3 +1,4 @@
+import { dateSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 
@@ -14,7 +15,7 @@ const updateUserSchema = z.object({
   userInformation: z
     .object({
       fullName: z.string().optional(),
-      dob: z.date().optional(),
+      dob: dateSchema.optional(),
       gender: genderSchema.optional(),
       address: z.string().optional(),
       province: z.string().optional(),
@@ -29,8 +30,8 @@ const updateUserSchema = z.object({
           fullName: z.string().optional(),
           nickname: z.string().optional(),
           status: z.enum(['UNBORN', 'BORN']),
-          birthDate: z.date().optional(),
-          dueDate: z.date().optional(),
+          birthDate: dateSchema.optional(),
+          dueDate: dateSchema.optional(),
           gender: genderSchema,
         })
         .superRefine((data, ctx) => {
