@@ -15,7 +15,7 @@ export class PostsController {
     private readonly commentsService: CommentsService,
   ) {}
 
-  @Auth('USER')
+  @Auth('USER', 'ADMIN')
   @Get('')
   async findAll(@Query() queryDto: DefaultFindAllQueryDto) {
     return this.postsService.findAll(queryDto);
