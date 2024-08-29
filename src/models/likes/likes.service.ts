@@ -1,16 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@shared/prisma';
+import { IToggleLike } from './interfaces';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class LikesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async toggleLikePost(postId: string, accountId: string) {
+  async toggleLike({ id, accountId, type }: IToggleLike) {
+    const where: Prisma.LikeWhereInput = {
+      accountId,
+    };
+
+    if (type === 'POST') {
+      where.postId = id;
+    }
+
+    if (type === 'ARTICLE') {
+      where.articleId = id;
+    }
+
     const like = await this.prisma.like.findFirst({
-      where: {
-        postId,
-        accountId,
-      },
+      where,
     });
 
     if (like) {
@@ -22,19 +33,32 @@ export class LikesService {
 
       return 'UNLIKE';
     } else {
-      await this.prisma.like.create({
-        data: {
-          post: {
-            connect: {
-              id: postId,
-            },
-          },
-          account: {
-            connect: {
-              id: accountId,
-            },
+      const data: Prisma.LikeCreateInput = {
+        account: {
+          connect: {
+            id: accountId,
           },
         },
+      };
+
+      if (type === 'POST') {
+        data.post = {
+          connect: {
+            id,
+          },
+        };
+      }
+
+      if (type === 'ARTICLE') {
+        data.article = {
+          connect: {
+            id,
+          },
+        };
+      }
+
+      await this.prisma.like.create({
+        data,
       });
 
       return 'LIKE';
@@ -45,6 +69,14 @@ export class LikesService {
     return this.prisma.like.findMany({
       where: {
         postId,
+      },
+    });
+  }
+
+  async getLikesByArticleId(articleId: string) {
+    return this.prisma.like.findMany({
+      where: {
+        articleId,
       },
     });
   }
