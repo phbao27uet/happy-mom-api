@@ -90,7 +90,7 @@ async function main() {
     update: {},
   });
 
-  await prisma.category.upsert({
+  const category_1 = await prisma.category.upsert({
     where: {
       name: 'Đang mang thai',
     },
@@ -112,9 +112,12 @@ async function main() {
       },
     },
     update: {},
+    include: {
+      subCategories: true,
+    },
   });
 
-  await prisma.category.upsert({
+  const category_2 = await prisma.category.upsert({
     where: {
       name: 'Nuôi con nhỏ',
     },
@@ -140,6 +143,9 @@ async function main() {
       },
     },
     update: {},
+    include: {
+      subCategories: true,
+    },
   });
 
   await prisma.article.upsert({
@@ -152,7 +158,7 @@ async function main() {
       content: 'Nội dung bí quyết chăm sóc trẻ sơ sinh',
       subCategory: {
         connect: {
-          id: '66d05c0e4830214de6dc4483',
+          id: category_1.subCategories[0].id,
         },
       },
       description:
@@ -173,7 +179,7 @@ async function main() {
       content: 'Nội dung bí quyết chăm sóc trẻ sơ sinh',
       subCategory: {
         connect: {
-          id: '66d05c0e4830214de6dc4483',
+          id: category_1.subCategories[0].id,
         },
       },
       description:
@@ -194,7 +200,7 @@ async function main() {
       content: 'Nội dung bí quyết chăm sóc trẻ sơ sinh',
       subCategory: {
         connect: {
-          id: '66d05c0e4830214de6dc4483',
+          id: category_1.subCategories[0].id,
         },
       },
       description:
@@ -215,7 +221,7 @@ async function main() {
       content: 'Nội dung bí quyết chăm sóc trẻ sơ sinh',
       subCategory: {
         connect: {
-          id: '66d05c0d4830214de6dc4480',
+          id: category_2.subCategories[0].id,
         },
       },
       description:
