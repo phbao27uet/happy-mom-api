@@ -31,4 +31,22 @@ export class CommentsService {
       },
     });
   }
+
+  async commentArticle({
+    data,
+    authorId,
+    articleId,
+  }: {
+    data: CreateCommentDto;
+    authorId: string;
+    articleId: string;
+  }) {
+    return this.prisma.comment.create({
+      data: {
+        authorId,
+        articleId,
+        ...data,
+      },
+    });
+  }
 }

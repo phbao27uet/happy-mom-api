@@ -13,6 +13,8 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { LikesModule } from './likes/likes.module';
 import { SmsModule } from './sms/sms.module';
+import { ArticlesModule } from './articles/articles.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { SmsModule } from './sms/sms.module';
     LikesModule,
     CommentsModule,
     SmsModule,
+    ArticlesModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [

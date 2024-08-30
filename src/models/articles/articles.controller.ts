@@ -1,16 +1,15 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { PostsService } from './posts.service';
+import { ArticlesService } from './articles.service';
 import { Auth, GetCurrentId } from '@shared/decorators';
 import { DefaultFindAllQueryDto } from '@models/base';
-import { CreatePostDto, UpdatePostDto } from './dto';
 import { LikesService } from '@models/likes/likes.service';
 import { CommentsService } from '@models/comments/comments.service';
 import { CreateCommentDto } from '@models/comments/dto';
 
-@Controller('posts')
-export class PostsController {
+@Controller('articles')
+export class ArticlesController {
   constructor(
-    private readonly postsService: PostsService,
+    private readonly articlesService: ArticlesService,
     private readonly likesService: LikesService,
     private readonly commentsService: CommentsService,
   ) {}
@@ -18,34 +17,25 @@ export class PostsController {
   @Auth('USER', 'ADMIN')
   @Get('')
   async findAll(@Query() queryDto: DefaultFindAllQueryDto) {
-    return this.postsService.findAll(queryDto);
+    return this.articlesService.findAll(queryDto);
   }
 
   @Auth('USER', 'ADMIN')
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.postsService.findOne(id);
+    return this.articlesService.findOne(id);
   }
 
   @Auth('USER')
-  @Get(':id/comments')
-  async getComments(@Param('id') id: string) {
-    return this.commentsService.getCommentsByPostId(id);
+  @Get('by-category/:categoryId')
+  async findByCategory(@Param('categoryId') categoryId: string) {
+    return this.articlesService.findByCategory(categoryId);
   }
 
   @Auth('USER')
-  @Get(':id/likes')
-  async getLikes(@Param('id') id: string) {
-    return this.likesService.getLikesByPostId(id);
-  }
-
-  @Auth('USER')
-  @Post('')
-  async create(
-    @GetCurrentId() currentId: string,
-    @Body() createPostDto: CreatePostDto,
-  ) {
-    return this.postsService.create(currentId, createPostDto);
+  @Get('by-sub-category/:subCategoryId')
+  async findBySubCategory(@Param('subCategoryId') subCategoryId: string) {
+    return this.articlesService.findBySubCategory(subCategoryId);
   }
 
   @Auth('USER')
@@ -55,9 +45,9 @@ export class PostsController {
     @Param('id') id: string,
     @Body() createCommentDto: CreateCommentDto,
   ) {
-    return this.commentsService.create({
+    return this.commentsService.commentArticle({
       authorId: currentId,
-      postId: id,
+      articleId: id,
       data: createCommentDto,
     });
   }
@@ -71,19 +61,7 @@ export class PostsController {
     return this.likesService.toggleLike({
       id,
       accountId: currentId,
-      type: 'POST',
+      type: 'ARTICLE',
     });
-  }
-
-  @Auth('USER')
-  @Post(':id/remove')
-  async remove(@Param('id') id: string) {
-    return this.postsService.remove(id);
-  }
-
-  @Auth('USER')
-  @Post(':id/update')
-  async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(id, updatePostDto);
   }
 }
