@@ -1,21 +1,6 @@
 version: '3.8'
 
 services:
-  # db:
-  #   image: mongo:latest
-  #   container_name: mongodb
-  #   restart: unless-stopped
-  #   environment:
-  #     MONGO_INITDB_ROOT_USERNAME: mongo
-  #     MONGO_INITDB_ROOT_PASSWORD: bacphan1!
-  #     MONGO_INITDB_DATABASE: happymom
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - ../mongodb-data:/data/db
-  #   networks:
-  #     - my_network
-
   api:
     build:
       context: .
@@ -23,17 +8,6 @@ services:
     container_name: api
     restart: on-failure # Chỉ khởi động lại nếu container bị lỗi
     ports:
-      - "9981:9981"
+      - "8864:8864"
     env_file:
       - .env
-    depends_on:
-      - db
-    networks:
-      - my_network
-
-# volumes:
-#   mongodb-data:
-
-networks:
-  my_network:
-    driver: bridge
