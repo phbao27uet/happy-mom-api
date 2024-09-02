@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  api:
+  api-happymom:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: api
+    container_name: api-happymom
     restart: on-failure # Chỉ khởi động lại nếu container bị lỗi
     ports:
       - "8864:8864"
