@@ -26,6 +26,8 @@ model Account {
   likes        Like[]
   comments     Comment[]
   likeComments LikeComment[]
+  participants Participant[]
+  babyDiaries  BabyDiary[]
 }
 
 model User {
@@ -53,9 +55,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  childs       Child[]
-  memberships  Membership[]
-  participants Participant[]
+  childs      Child[]
+  memberships Membership[]
 }
 
 model OTP {
@@ -81,8 +82,9 @@ model Child {
   userId    String      @db.ObjectId
   user      User        @relation(fields: [userId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  babyDiaries BabyDiary[]
 }
 
 model Group {
@@ -229,12 +231,25 @@ model Event {
 }
 
 model Participant {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  accountId String   @db.ObjectId
+  eventId   String   @db.ObjectId
+  joinedAt  DateTime @default(now())
+  account   Account  @relation(fields: [accountId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BabyDiary {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId   String   @db.ObjectId
-  eventId  String   @db.ObjectId
-  joinedAt DateTime @default(now())
-  user     User     @relation(fields: [userId], references: [id])
-  event    Event    @relation(fields: [eventId], references: [id])
+  content  String?
+  images   String[] @default([])
+  childId  String   @db.ObjectId
+  child    Child    @relation(fields: [childId], references: [id])
+  authorId String   @db.ObjectId
+  author   Account  @relation(fields: [authorId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
