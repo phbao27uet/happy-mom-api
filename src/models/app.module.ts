@@ -16,6 +16,7 @@ import { SmsModule } from './sms/sms.module';
 import { ArticlesModule } from './articles/articles.module';
 import { CategoriesModule } from './categories/categories.module';
 import { BabyDiariesModule } from './baby-diaries/baby-diaries.module';
+import { FoodsModule } from './foods/foods.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { BabyDiariesModule } from './baby-diaries/baby-diaries.module';
     ArticlesModule,
     CategoriesModule,
     BabyDiariesModule,
+    FoodsModule,
   ],
   controllers: [AppController],
   providers: [

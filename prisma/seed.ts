@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { GuidelineType, PrismaClient } from '@prisma/client';
 import { hashPassword } from 'src/shared/utils/hash';
 
 const prisma = new PrismaClient();
@@ -230,6 +230,107 @@ async function main() {
         'https://pub-402f41e20b984c66a583408bb7b47aeb.r2.dev/1706770133_avatar_1706770133%201.png',
     },
     update: {},
+  });
+
+  const foodCategories = await Promise.all([
+    prisma.foodCategory.upsert({
+      where: { name: 'Ngũ cốc nguyên hạt' },
+      update: {},
+      create: {
+        name: 'Ngũ cốc nguyên hạt',
+        imageUrl:
+          'https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2022/11/9/veggies-1667967142376-1667967142662941776652.jpg',
+      },
+    }),
+    prisma.foodCategory.upsert({
+      where: { name: 'Rau củ' },
+      update: {},
+      create: {
+        name: 'Rau củ',
+        imageUrl:
+          'https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2022/11/9/veggies-1667967142376-1667967142662941776652.jpg',
+      },
+    }),
+    prisma.foodCategory.upsert({
+      where: { name: 'Gia vị' },
+      update: {},
+      create: {
+        name: 'Gia vị',
+        imageUrl:
+          'https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2022/11/9/veggies-1667967142376-1667967142662941776652.jpg',
+      },
+    }),
+    prisma.foodCategory.upsert({
+      where: { name: 'Các loại hạt' },
+      update: {},
+      create: {
+        name: 'Các loại hạt',
+        imageUrl:
+          'https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2022/11/9/veggies-1667967142376-1667967142662941776652.jpg',
+      },
+    }),
+    prisma.foodCategory.upsert({
+      where: { name: 'Trái cây' },
+      update: {},
+      create: {
+        name: 'Trái cây',
+        imageUrl:
+          'https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2022/11/9/veggies-1667967142376-1667967142662941776652.jpg',
+      },
+    }),
+  ]);
+
+  // Seed Foods with Guidelines
+  await prisma.food.upsert({
+    where: { name: 'Gạo lứt' },
+    update: {},
+    create: {
+      name: 'Gạo lứt',
+      description: 'Gạo lứt là loại ngũ cốc nguyên hạt, giàu dinh dưỡng.',
+      imageUrl:
+        'https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2022/11/9/veggies-1667967142376-1667967142662941776652.jpg',
+      foodCategoryId: foodCategories[0].id, // Ngũ cốc nguyên hạt
+      guidelines: {
+        create: [
+          {
+            name: 'Mang thai',
+            type: GuidelineType.CAN_EAT,
+            description: 'Gạo lứt có thể ăn, tốt cho sức khỏe.',
+          },
+          {
+            name: 'Hậu sản',
+            type: GuidelineType.CAN_EAT_NOT_RECOMMENDED,
+            description: 'Ăn gạo lứt nhiều có thể gây khó tiêu.',
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.food.upsert({
+    where: { name: 'Cà rốt' },
+    update: {},
+    create: {
+      name: 'Cà rốt',
+      description: 'Cà rốt giàu vitamin A, tốt cho mắt và da.',
+      imageUrl:
+        'https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2022/11/9/veggies-1667967142376-1667967142662941776652.jpg',
+      foodCategoryId: foodCategories[1].id, // Rau củ
+      guidelines: {
+        create: [
+          {
+            name: 'Mang thai',
+            type: GuidelineType.CAN_EAT,
+            description: 'Có thể ăn cà rốt, tốt cho sức khỏe.',
+          },
+          {
+            name: 'Hậu sản',
+            type: GuidelineType.SHOULD_NOT_EAT,
+            description: 'Không nên ăn quá nhiều cà rốt, có thể gây vàng da.',
+          },
+        ],
+      },
+    },
   });
 
   console.log('seed success');
