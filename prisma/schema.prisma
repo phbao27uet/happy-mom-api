@@ -255,6 +255,44 @@ model BabyDiary {
   updatedAt DateTime @updatedAt
 }
 
+model FoodCategory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  imageUrl  String
+  foods     Food[]   @relation("CategoryFoods")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Food {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  name           String       @unique
+  description    String
+  imageUrl       String
+  foodCategory   FoodCategory @relation("CategoryFoods", fields: [foodCategoryId], references: [id])
+  foodCategoryId String       @db.ObjectId
+  guidelines     Guideline[]  @relation("FoodGuidelines")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Guideline {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  type        GuidelineType // Enum type for guideline categories
+  name        String
+  description String
+  food        Food          @relation("FoodGuidelines", fields: [foodId], references: [id])
+  foodId      String        @db.ObjectId
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum GuidelineType {
+  CAN_EAT // Có thể ăn -- Màu xanh
+  CAN_EAT_NOT_RECOMMENDED // Có thể ăn nhưng không nên -- Màu vàng
+  SHOULD_NOT_EAT // Không nên ăn -- Màu đỏ
+}
+
 enum Role {
   ADMIN
   USER
