@@ -28,6 +28,7 @@ model Account {
   likeComments LikeComment[]
   participants Participant[]
   babyDiaries  BabyDiary[]
+  alarms       Alarm[]
 }
 
 model User {
@@ -281,10 +282,48 @@ model Guideline {
   type        GuidelineType // Enum type for guideline categories
   name        String
   description String
-  food        Food          @relation("FoodGuidelines", fields: [foodId], references: [id])
+  food        Food          @relation("FoodGuidelines", fields: [foodId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   foodId      String        @db.ObjectId
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+}
+
+model Alarm {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  type     AlarmType
+  activity Activity
+  time     DateTime
+  isActive Boolean   @default(true)
+  interval Interval?
+  notes    String?
+
+  accountId String   @db.ObjectId
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Interval {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  minutes Float?
+  alarm   Alarm  @relation(fields: [alarmId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  alarmId String @unique @db.ObjectId
+}
+
+enum AlarmType {
+  TIME // Báo thức thời gian cố định
+  HOUR_INTERVAL // Kỳ giờ
+  DAY_INTERVAL // Kỳ ngày
+}
+
+enum Activity {
+  PUMPING // Hút sữa
+  FEEDING // Cho ăn
+  TEMPERATURE // Đo nhiệt độ
+  DIAPER_CHANGE // Thay bỉm
+  MEDICINE // Uống thuốc
+  SLEEPING // Đi ngủ
+  OTHER // Khác
 }
 
 enum GuidelineType {
