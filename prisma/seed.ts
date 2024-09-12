@@ -3,6 +3,35 @@ import { hashPassword } from 'src/shared/utils/hash';
 
 const prisma = new PrismaClient();
 
+const generateVaccine = async () => {
+  const vaccineHBV = await prisma.vaccine.upsert({
+    where: {
+      name: 'Viêm gan B (HBV)',
+    },
+    create: {
+      name: 'Viêm gan B (HBV)',
+      diseaseDescription:
+        'Viêm gan B là một bệnh viêm gan do virus viêm gan B (HBV)',
+      numberOfInjectionDoses: 5,
+      vaccineTypesDescription:
+        'Vắc xin viêm gan B có 2 loại: vắc xin viêm gan B tiêm cơ bản và vắc xin viêm gan B tiêm cơ bản kết hợp với vắc xin viêm gan A.',
+      sideEffects: 'Sưng nóng đỏ tại chỗ tiêm 1-2 ngày',
+
+      vaccineDoeses: {
+        createMany: {
+          data: [
+            {
+              time: '0-24h sau sinh',
+              priority: 1,
+              description: `<div style={{fontSize: "10px",fontWeight: "500",lineHeight: "14px",textAlign: "left"}}><p>Viêm gan B (HBV) - Mũi 1: Tốt nhất tiêm trong vòng 24h sau sinh</p><p>Cho trẻ sơ sinh</p><ul><li>Lịch tiêm 1 mũi duy nhất, tiêm càng sớm càng tốt trong 1 tháng sau sinh </li></ul></div>`,
+            },
+          ],
+        },
+      },
+    },
+    update: {},
+  });
+};
 async function main() {
   const password = await hashPassword('123123a');
 
@@ -332,6 +361,8 @@ async function main() {
       },
     },
   });
+
+  await generateVaccine();
 
   console.log('seed success');
 }
