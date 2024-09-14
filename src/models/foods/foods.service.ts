@@ -55,9 +55,14 @@ export class FoodsService {
   }
 
   async findAllFoodCategories(defaultFindAllQuery: DefaultFindAllQueryDto) {
-    const { perPage = 20, page = 1 } = defaultFindAllQuery;
+    const { perPage = 20, page = 1, searchOne } = defaultFindAllQuery;
 
-    const where: Prisma.FoodCategoryWhereInput = {};
+    const where: Prisma.FoodCategoryWhereInput = {
+      name: {
+        contains: searchOne,
+        mode: 'insensitive',
+      },
+    };
 
     const [total, data] = await Promise.all([
       this.prisma.foodCategory.count({
