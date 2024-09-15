@@ -18,6 +18,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { BabyDiariesModule } from './baby-diaries/baby-diaries.module';
 import { FoodsModule } from './foods/foods.module';
 import { AlarmsModule } from './alarms/alarms.module';
+import { VaccinesModule } from './vaccines/vaccines.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AlarmsModule } from './alarms/alarms.module';
     BabyDiariesModule,
     FoodsModule,
     AlarmsModule,
+    VaccinesModule,
   ],
   controllers: [AppController],
   providers: [
