@@ -83,9 +83,10 @@ model Child {
   userId    String      @db.ObjectId
   user      User        @relation(fields: [userId], references: [id])
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  babyDiaries BabyDiary[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  babyDiaries       BabyDiary[]
+  vaccineInjections VaccineInjection[]
 }
 
 model Group {
@@ -310,6 +311,47 @@ model Interval {
   alarmId String @unique @db.ObjectId
 }
 
+model Vaccine {
+  id                      String        @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String        @unique
+  diseaseDescription      String // Mô tả về bệnh
+  vaccineTypesDescription String // Các loại vắc xin
+  numberOfInjectionDoses  Int // Số liều tiêm
+  sideEffects             String // Tác dụng phụ
+  injectionDescription    String // Mô tả về cách tiêm
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  vaccineDoeses           VaccineDoes[]
+}
+
+model VaccineDoes {
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
+  vaccineId         String             @db.ObjectId
+  vaccine           Vaccine            @relation(fields: [vaccineId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  time              String
+  dueVaccination    String
+  isMandatory       Boolean            @default(true)
+  description       String // Hiển thị trong màn lịch tiêm phòng
+  priority          Int                @unique // Sắp xếp theo thứ tự ưu tiên
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  vaccineInjections VaccineInjection[]
+}
+
+model VaccineInjection {
+  id            String                 @id @default(auto()) @map("_id") @db.ObjectId
+  vaccineDoesId String                 @db.ObjectId
+  vaccineDoes   VaccineDoes            @relation(fields: [vaccineDoesId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  childId       String                 @db.ObjectId
+  child         Child                  @relation(fields: [childId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  injectionAt   DateTime?
+  status        VaccineInjectionStatus @default(NOT_INJECTED)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@unique([vaccineDoesId, childId])
+}
+
 enum AlarmType {
   TIME // Báo thức thời gian cố định
   HOUR_INTERVAL // Kỳ giờ
@@ -357,4 +399,10 @@ enum PregnancyStatus {
 
 enum OTPType {
   FORGOT_PASSWORD
+}
+
+enum VaccineInjectionStatus {
+  INJECTED // Đã tiêm
+  NOT_INJECTED // Chưa tiêm
+  SKIP // Bỏ qua
 }
