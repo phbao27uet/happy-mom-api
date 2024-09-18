@@ -1,17 +1,197 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 import { DefaultFindAllQueryDto } from '@models/base';
 import { CreateAlarmDto, UpdateAlarmDto } from './dto';
-import { isNil } from 'lodash';
+import { isNil, omit } from 'lodash';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { NotificationService } from '@shared/notifications/notifications.service';
+import { CronJob } from 'cron';
 
 @Injectable()
-export class AlarmsService {
-  constructor(private readonly prisma: PrismaService) {}
+export class AlarmsService implements OnModuleInit {
+  private readonly logger = new Logger(AlarmsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly notificationService: NotificationService,
+  ) {}
+
+  async onModuleInit() {
+    await this.initializeAlarms();
+  }
 
   private readonly _include: Prisma.AlarmInclude = {
     interval: true,
   };
+
+  async initializeAlarms() {
+    const alarms = await this.prisma.alarm.findMany({
+      where: { isActive: true },
+      include: { interval: true, account: true },
+    });
+
+    for (const alarm of alarms) {
+      await this.scheduleAlarm(alarm);
+    }
+  }
+
+  async scheduleAlarm(alarm: any) {
+    const jobName = `alarm_${alarm.id}`;
+
+    this.deleteAlarmSchedule(alarm.id);
+
+    let job: CronJob;
+    const now = new Date();
+    const alarmTime = new Date(alarm.time);
+
+    switch (alarm.type) {
+      case 'TIME':
+        if (alarm.interval && alarm.interval.minutes) {
+          // Xử lý cho alarm lặp lại theo khoảng thời gian
+          const cronPattern = `*/${alarm.interval.minutes} * * * *`;
+          job = new CronJob(cronPattern, () =>
+            this.sendAlarmNotification(alarm),
+          );
+
+          this.logger.debug(
+            `Đã lên lịch cho alarm: ${jobName} loại: ${alarm.type} với pattern: ${cronPattern}`,
+          );
+        } else {
+          // Xử lý cho alarm một lần
+          if (alarmTime > now) {
+            job = new CronJob(alarmTime, () => {
+              this.sendAlarmNotification(alarm);
+              this.schedulerRegistry.deleteCronJob(jobName);
+            });
+
+            this.logger.debug(
+              `Đã lên lịch cho alarm: ${jobName} loại: ${alarm.type} vào lúc: ${alarmTime}`,
+            );
+          } else {
+            this.logger.debug(
+              `Alarm ${alarm.id} đã quá hạn và sẽ không được kích hoạt.`,
+            );
+            return; // Không lên lịch cho alarm đã quá hạn
+          }
+        }
+        break;
+      case 'HOUR_INTERVAL':
+        const cronPatternHour = `${alarmTime.getMinutes()} * * * *`;
+        // const cronPatternHour = `*/1 * * * *`; // For testing
+
+        job = new CronJob(
+          cronPatternHour,
+          () => {
+            this.sendAlarmNotification(alarm);
+          },
+          null,
+          false,
+          'UTC',
+          null,
+          false, // runOnInit = false
+        );
+
+        this.logger.debug(
+          `Đã lên lịch cho alarm HOUR_INTERVAL: ${jobName} loại: ${alarm.type} với pattern: ${cronPatternHour}`,
+        );
+
+        break;
+      case 'DAY_INTERVAL':
+        const cronPatternDay = `${alarmTime.getMinutes()} ${alarmTime.getHours()} * * *`;
+
+        job = new CronJob(
+          cronPatternDay,
+          () => {
+            this.sendAlarmNotification(alarm);
+          },
+          null,
+          false,
+          'UTC',
+          null,
+          false, // runOnInit = false
+        );
+
+        this.logger.debug(
+          `Đã lên lịch cho alarm DAY_INTERVAL: ${jobName} loại: ${alarm.type} với pattern: ${cronPatternDay}`,
+        );
+        break;
+      default:
+        throw new Error('Loại alarm không hợp lệ');
+    }
+
+    if (job) {
+      this.schedulerRegistry.addCronJob(jobName, job);
+      job.start();
+    }
+  }
+
+  async deleteAlarmSchedule(id: string) {
+    const jobName = `alarm_${id}`;
+
+    if (this.schedulerRegistry.doesExist('cron', jobName)) {
+      this.logger.debug(`Đã xóa lịch cho alarm: ${jobName}`);
+      this.schedulerRegistry.deleteCronJob(jobName);
+    }
+  }
+
+  async sendAlarmNotification(alarm: any) {
+    const account = await this.prisma.account.findUnique({
+      where: { id: alarm.accountId },
+    });
+
+    console.log(
+      `Gửi thông báo cho hoạt động: ${alarm.activity} ${alarm.type} cho tài khoản: ${account?.id}`,
+    );
+
+    console.log({
+      message: `Thông báo cho hoạt động: ${alarm.activity}`,
+      alarm: omit(alarm, ['account']),
+    });
+
+    if (!account || !account.pushTokens || account.pushTokens.length === 0) {
+      console.error(
+        `Không có token push hợp lệ cho tài khoản: ${alarm.accountId}`,
+      );
+      return;
+    }
+
+    const message = `Thông báo cho hoạt động: ${alarm.activity}`;
+    await this.notificationService.sendPushNotification(
+      account.pushTokens,
+      message,
+      omit(alarm, ['account', 'interval']),
+    );
+  }
+
+  async findAllCron() {
+    try {
+      const jobs = this.schedulerRegistry.getCronJobs();
+
+      const infor: any[] = [];
+
+      jobs.forEach((job) => {
+        infor.push({
+          name: job.cronTime.toString(),
+          cronPattern: job.cronTime.source + ' ' + job.cronTime.timeZone,
+          running: job.running,
+        });
+      });
+
+      return {
+        size: jobs.size,
+        jobs: infor,
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   async findAllMine(
     currentId: string,
@@ -88,11 +268,15 @@ export class AlarmsService {
       },
     });
 
+    if (res.isActive) {
+      await this.scheduleAlarm(res);
+    }
+
     return res;
   }
 
   async remove(id: string) {
-    return this.prisma.alarm.delete({
+    const res = await this.prisma.alarm.delete({
       where: {
         id,
       },
@@ -100,6 +284,10 @@ export class AlarmsService {
         ...this._include,
       },
     });
+
+    this.deleteAlarmSchedule(id);
+
+    return res;
   }
 
   /**
@@ -143,7 +331,7 @@ export class AlarmsService {
       };
     })();
 
-    return this.prisma.alarm.update({
+    const res = await this.prisma.alarm.update({
       where: {
         id,
       },
@@ -155,6 +343,12 @@ export class AlarmsService {
         ...this._include,
       },
     });
+
+    if (res.isActive) {
+      await this.scheduleAlarm(res);
+    }
+
+    return res;
   }
 
   async toggle(id: string) {
@@ -168,7 +362,7 @@ export class AlarmsService {
       throw new NotFoundException('Không tìm thấy báo thức');
     }
 
-    return this.prisma.alarm.update({
+    const res = await this.prisma.alarm.update({
       where: {
         id,
       },
@@ -179,5 +373,13 @@ export class AlarmsService {
         ...this._include,
       },
     });
+
+    if (res.isActive) {
+      await this.scheduleAlarm(res);
+    } else {
+      this.deleteAlarmSchedule(id);
+    }
+
+    return res;
   }
 }

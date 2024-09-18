@@ -19,6 +19,8 @@ import { BabyDiariesModule } from './baby-diaries/baby-diaries.module';
 import { FoodsModule } from './foods/foods.module';
 import { AlarmsModule } from './alarms/alarms.module';
 import { VaccinesModule } from './vaccines/vaccines.module';
+import { NotificationsModule } from '@shared/notifications/notifications.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { VaccinesModule } from './vaccines/vaccines.module';
       expandVariables: true,
       load: [configurations],
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     GroupsModule,
@@ -43,6 +46,8 @@ import { VaccinesModule } from './vaccines/vaccines.module';
     FoodsModule,
     AlarmsModule,
     VaccinesModule,
+
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

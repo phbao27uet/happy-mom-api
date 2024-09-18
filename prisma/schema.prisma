@@ -18,6 +18,7 @@ model Account {
   pinCode      String?
   isVerified   Boolean       @default(false)
   refreshToken String?
+  pushTokens   String[]      @default([])
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   user         User?

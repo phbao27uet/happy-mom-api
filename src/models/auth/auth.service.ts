@@ -16,7 +16,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { OTPService } from '@models/otp/otp.service';
 import { SmsService } from '@models/sms/sms.service';
 import { isMail } from '@shared/utils';
-import { omit } from 'lodash';
+import { omit, uniq } from 'lodash';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,13 @@ export class AuthService {
     private otpService: OTPService,
     private smsService: SmsService,
   ) {}
+
+  private _select: Prisma.AccountSelect = {
+    id: true,
+    username: true,
+    role: true,
+    pushTokens: true,
+  };
 
   async signup(dto: SignUpDto) {
     const accountExist = await this.prisma.account.findUnique({
@@ -256,5 +264,30 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async updatePushToken(accountId: string, pushToken: string) {
+    const account = await this.prisma.account.findUnique({
+      where: {
+        id: accountId,
+      },
+      select: {
+        pushTokens: true,
+      },
+    });
+
+    if (!account) throw new BadRequestException('Tài khoản không tồn tại');
+
+    const res = await this.prisma.account.update({
+      where: {
+        id: accountId,
+      },
+      data: {
+        pushTokens: uniq([...account.pushTokens, pushToken]),
+      },
+      select: this._select,
+    });
+
+    return res;
   }
 }
