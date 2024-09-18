@@ -16,26 +16,4 @@ export class NotificationController {
     );
     return { success: true };
   }
-
-  @Post('schedule')
-  scheduleNotification(
-    @Body()
-    body: {
-      tokens: string[];
-      message: string;
-      data?: object;
-      scheduleTime: string;
-      repeatPattern?: 'hourly' | 'daily';
-    },
-  ) {
-    const scheduleTime = new Date(body.scheduleTime);
-    this.notificationService.scheduleNotification({
-      tokens: body.tokens,
-      message: body.message,
-      data: body.data,
-      scheduleTime,
-      repeatPattern: body.repeatPattern,
-    });
-    return { success: true };
-  }
 }

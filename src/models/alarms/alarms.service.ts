@@ -1,15 +1,22 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
-import { $Enums, Prisma } from '@prisma/client';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 import { DefaultFindAllQueryDto } from '@models/base';
 import { CreateAlarmDto, UpdateAlarmDto } from './dto';
-import { isNil } from 'lodash';
+import { isNil, omit } from 'lodash';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { NotificationService } from '@shared/notifications/notifications.service';
 import { CronJob } from 'cron';
 
 @Injectable()
 export class AlarmsService implements OnModuleInit {
+  private readonly logger = new Logger(AlarmsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly schedulerRegistry: SchedulerRegistry,
@@ -55,10 +62,9 @@ export class AlarmsService implements OnModuleInit {
             this.sendAlarmNotification(alarm),
           );
 
-          // Nếu thời gian alarm đã qua, gửi thông báo ngay lập tức
-          if (alarmTime < now) {
-            this.sendAlarmNotification(alarm);
-          }
+          this.logger.debug(
+            `Đã lên lịch cho alarm: ${jobName} loại: ${alarm.type} với pattern: ${cronPattern}`,
+          );
         } else {
           // Xử lý cho alarm một lần
           if (alarmTime > now) {
@@ -66,8 +72,12 @@ export class AlarmsService implements OnModuleInit {
               this.sendAlarmNotification(alarm);
               this.schedulerRegistry.deleteCronJob(jobName);
             });
+
+            this.logger.debug(
+              `Đã lên lịch cho alarm: ${jobName} loại: ${alarm.type} vào lúc: ${alarmTime}`,
+            );
           } else {
-            console.log(
+            this.logger.debug(
               `Alarm ${alarm.id} đã quá hạn và sẽ không được kích hoạt.`,
             );
             return; // Không lên lịch cho alarm đã quá hạn
@@ -75,14 +85,11 @@ export class AlarmsService implements OnModuleInit {
         }
         break;
       case 'HOUR_INTERVAL':
-        // Tính toán thời gian bắt đầu tiếp theo
-        const nextHourTime = new Date(alarmTime);
-        while (nextHourTime <= now) {
-          nextHourTime.setHours(nextHourTime.getHours() + 1);
-        }
+        // const cronPatternHour = `${alarmTime.getMinutes()} * * * *`;
+        const cronPatternHour = `*/1 * * * *`;
 
         job = new CronJob(
-          nextHourTime,
+          cronPatternHour,
           () => {
             this.sendAlarmNotification(alarm);
           },
@@ -90,18 +97,19 @@ export class AlarmsService implements OnModuleInit {
           false,
           'UTC',
           null,
-          true,
-        ); // Thêm 'true' để job tự động chạy lại
+          false, // runOnInit = false
+        );
+
+        this.logger.debug(
+          `Đã lên lịch cho alarm HOUR_INTERVAL: ${jobName} loại: ${alarm.type} với pattern: ${cronPatternHour}`,
+        );
+
         break;
       case 'DAY_INTERVAL':
-        // Tính toán thời gian bắt đầu tiếp theo
-        const nextDayTime = new Date(alarmTime);
-        while (nextDayTime <= now) {
-          nextDayTime.setDate(nextDayTime.getDate() + 1);
-        }
+        const cronPatternDay = `${alarmTime.getMinutes()} ${alarmTime.getHours()} * * *`;
 
         job = new CronJob(
-          nextDayTime,
+          cronPatternDay,
           () => {
             this.sendAlarmNotification(alarm);
           },
@@ -109,8 +117,12 @@ export class AlarmsService implements OnModuleInit {
           false,
           'UTC',
           null,
-          true,
-        ); // Thêm 'true' để job tự động chạy lại
+          false, // runOnInit = false
+        );
+
+        this.logger.debug(
+          `Đã lên lịch cho alarm DAY_INTERVAL: ${jobName} loại: ${alarm.type} với pattern: ${cronPatternDay}`,
+        );
         break;
       default:
         throw new Error('Loại alarm không hợp lệ');
@@ -119,7 +131,6 @@ export class AlarmsService implements OnModuleInit {
     if (job) {
       this.schedulerRegistry.addCronJob(jobName, job);
       job.start();
-      console.log(`Đã lên lịch cho alarm: ${jobName} loại: ${alarm.type}`);
     }
   }
 
@@ -129,22 +140,50 @@ export class AlarmsService implements OnModuleInit {
     });
 
     console.log(
-      `Gửi thông báo cho hoạt động: ${alarm.activity} cho tài khoản: ${account?.id}`,
+      `Gửi thông báo cho hoạt động: ${alarm.activity} ${alarm.type} cho tài khoản: ${account?.id}`,
     );
 
-    // if (!account || !account.pushToken) {
-    //   console.error(
-    //     `Không có token push hợp lệ cho tài khoản: ${alarm.accountId}`,
-    //   );
-    //   return;
-    // }
+    console.log({
+      message: `Thông báo cho hoạt động: ${alarm.activity}`,
+      alarm: omit(alarm, ['account']),
+    });
 
-    // const message = `Thông báo cho hoạt động: ${alarm.activity}`;
-    // await this.notificationService.sendPushNotification(
-    //   [account.pinCode],
-    //   message,
-    //   { alarmId: alarm.id },
-    // );
+    if (!account || !account.pushTokens || account.pushTokens.length === 0) {
+      console.error(
+        `Không có token push hợp lệ cho tài khoản: ${alarm.accountId}`,
+      );
+      return;
+    }
+
+    const message = `Thông báo cho hoạt động: ${alarm.activity}`;
+    await this.notificationService.sendPushNotification(
+      account.pushTokens,
+      message,
+      omit(alarm, ['account', 'interval']),
+    );
+  }
+
+  async findAllCron() {
+    try {
+      const jobs = this.schedulerRegistry.getCronJobs();
+
+      const infor: any[] = [];
+
+      jobs.forEach((job) => {
+        infor.push({
+          name: job.cronTime.toString(),
+          cronPattern: job.cronTime.source + ' ' + job.cronTime.timeZone,
+          running: job.running,
+        });
+      });
+
+      return {
+        size: jobs.size,
+        jobs: infor,
+      };
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async findAllMine(

@@ -26,6 +26,11 @@ export class AlarmsController {
     return this.alarmsService.findAllMine(currentId, queryDto);
   }
 
+  @Get('cron')
+  async findAllCron() {
+    return this.alarmsService.findAllCron();
+  }
+
   @Auth('USER', 'ADMIN')
   @Get(':id')
   async findOne(@Param('id') id: string) {
