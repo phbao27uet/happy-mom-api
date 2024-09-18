@@ -45,9 +45,7 @@ export class AlarmsService implements OnModuleInit {
   async scheduleAlarm(alarm: any) {
     const jobName = `alarm_${alarm.id}`;
 
-    if (this.schedulerRegistry.doesExist('cron', jobName)) {
-      this.schedulerRegistry.deleteCronJob(jobName);
-    }
+    this.deleteAlarmSchedule(alarm.id);
 
     let job: CronJob;
     const now = new Date();
@@ -85,8 +83,8 @@ export class AlarmsService implements OnModuleInit {
         }
         break;
       case 'HOUR_INTERVAL':
-        // const cronPatternHour = `${alarmTime.getMinutes()} * * * *`;
-        const cronPatternHour = `*/1 * * * *`;
+        const cronPatternHour = `${alarmTime.getMinutes()} * * * *`;
+        // const cronPatternHour = `*/1 * * * *`; // For testing
 
         job = new CronJob(
           cronPatternHour,
@@ -131,6 +129,15 @@ export class AlarmsService implements OnModuleInit {
     if (job) {
       this.schedulerRegistry.addCronJob(jobName, job);
       job.start();
+    }
+  }
+
+  async deleteAlarmSchedule(id: string) {
+    const jobName = `alarm_${id}`;
+
+    if (this.schedulerRegistry.doesExist('cron', jobName)) {
+      this.logger.debug(`Đã xóa lịch cho alarm: ${jobName}`);
+      this.schedulerRegistry.deleteCronJob(jobName);
     }
   }
 
@@ -261,11 +268,15 @@ export class AlarmsService implements OnModuleInit {
       },
     });
 
+    if (res.isActive) {
+      await this.scheduleAlarm(res);
+    }
+
     return res;
   }
 
   async remove(id: string) {
-    return this.prisma.alarm.delete({
+    const res = await this.prisma.alarm.delete({
       where: {
         id,
       },
@@ -273,6 +284,10 @@ export class AlarmsService implements OnModuleInit {
         ...this._include,
       },
     });
+
+    this.deleteAlarmSchedule(id);
+
+    return res;
   }
 
   /**
@@ -316,7 +331,7 @@ export class AlarmsService implements OnModuleInit {
       };
     })();
 
-    return this.prisma.alarm.update({
+    const res = await this.prisma.alarm.update({
       where: {
         id,
       },
@@ -328,6 +343,12 @@ export class AlarmsService implements OnModuleInit {
         ...this._include,
       },
     });
+
+    if (res.isActive) {
+      await this.scheduleAlarm(res);
+    }
+
+    return res;
   }
 
   async toggle(id: string) {
@@ -341,7 +362,7 @@ export class AlarmsService implements OnModuleInit {
       throw new NotFoundException('Không tìm thấy báo thức');
     }
 
-    return this.prisma.alarm.update({
+    const res = await this.prisma.alarm.update({
       where: {
         id,
       },
@@ -352,5 +373,13 @@ export class AlarmsService implements OnModuleInit {
         ...this._include,
       },
     });
+
+    if (res.isActive) {
+      await this.scheduleAlarm(res);
+    } else {
+      this.deleteAlarmSchedule(id);
+    }
+
+    return res;
   }
 }

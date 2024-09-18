@@ -1,20 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Expo, ExpoPushMessage } from 'expo-server-sdk';
-import { SchedulerRegistry } from '@nestjs/schedule';
-
-interface ScheduledNotification {
-  tokens: string[];
-  message: string;
-  data?: object;
-  scheduleTime: Date;
-}
 
 @Injectable()
 export class NotificationService {
   private expo: Expo;
-  private scheduledNotifications: ScheduledNotification[] = [];
 
-  constructor(private schedulerRegistry: SchedulerRegistry) {
+  constructor() {
     this.expo = new Expo();
   }
 
