@@ -88,6 +88,7 @@ model Child {
   updatedAt         DateTime           @updatedAt
   babyDiaries       BabyDiary[]
   vaccineInjections VaccineInjection[]
+  baseEntries       BaseEntry[]
 }
 
 model Group {
@@ -351,6 +352,99 @@ model VaccineInjection {
   updatedAt     DateTime               @updatedAt
 
   @@unique([vaccineDoesId, childId])
+}
+
+model BaseEntry {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  date      DateTime
+  note      String?
+  imageUrls String[]  @default([])
+  type      EntryType
+  childId   String    @db.ObjectId
+  child     Child     @relation(fields: [childId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // solidFoodEntry SolidFoodEntry?
+  pumpingEntry PumpingEntry?
+  feedingEntry FeedingEntry?
+  diaperEntry  DiaperEntry?
+  sleepEntry   SleepEntry?
+}
+
+model PumpingEntry {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  baseEntry         BaseEntry @relation(fields: [baseEntryId], references: [id])
+  baseEntryId       String    @unique @db.ObjectId
+  totalAmount       Float
+  leftBreastAmount  Float?
+  rightBreastAmount Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FeedingEntry {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  baseEntry     BaseEntry     @relation(fields: [baseEntryId], references: [id])
+  baseEntryId   String        @unique @db.ObjectId
+  feedingMethod FeedingMethod
+  startTime     DateTime
+  endTime       DateTime
+  milkType      MilkType
+  amount        Float // lượng sữa (ml hoặc oz)
+  duration      Int // in minutes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DiaperEntry {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  baseEntry   BaseEntry    @relation(fields: [baseEntryId], references: [id])
+  baseEntryId String       @unique @db.ObjectId
+  reason      DiaperReason
+  time        DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SleepEntry {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  baseEntry   BaseEntry @relation(fields: [baseEntryId], references: [id])
+  baseEntryId String    @unique @db.ObjectId
+  startTime   DateTime
+  endTime     DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum EntryType {
+  PUMPING
+  FEEDING
+  DIAPER
+  SLEEP
+  SOLID_FOOD
+}
+
+enum FeedingMethod {
+  BREAST // Bú mẹ
+  BOTTLE // Bú bình
+}
+
+enum MilkType {
+  BREAST_MILK // Sữa mẹ
+  FORMULA // Sữa công thức
+}
+
+enum DiaperReason {
+  PEE // Bé tè
+  POO // Bé ị
+  BOTH // Bé vừa tè vừa ị
+  DRY_CHANGE // Bỉm khô thích thì thay
 }
 
 enum AlarmType {
