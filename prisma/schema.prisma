@@ -88,7 +88,7 @@ model Child {
   updatedAt         DateTime           @updatedAt
   babyDiaries       BabyDiary[]
   vaccineInjections VaccineInjection[]
-  baseEntries       BaseEntry[]
+  baseEntries       BabyTracking[]
 }
 
 model Group {
@@ -354,29 +354,29 @@ model VaccineInjection {
   @@unique([vaccineDoesId, childId])
 }
 
-model BaseEntry {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+model BabyTracking {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
   date      DateTime
   note      String?
-  imageUrls String[]  @default([])
-  type      EntryType
-  childId   String    @db.ObjectId
-  child     Child     @relation(fields: [childId], references: [id])
+  imageUrls String[]         @default([])
+  type      BabyTrackingType
+  childId   String           @db.ObjectId
+  child     Child            @relation(fields: [childId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // solidFoodEntry SolidFoodEntry?
-  pumpingEntry PumpingEntry?
-  feedingEntry FeedingEntry?
-  diaperEntry  DiaperEntry?
-  sleepEntry   SleepEntry?
+  pumpingEntry   PumpingEntry?
+  feedingEntry   FeedingEntry?
+  diaperEntry    DiaperEntry?
+  sleepEntry     SleepEntry?
+  solidFoodEntry SolidFoodEntry?
 }
 
 model PumpingEntry {
-  id                String    @id @default(auto()) @map("_id") @db.ObjectId
-  baseEntry         BaseEntry @relation(fields: [baseEntryId], references: [id])
-  baseEntryId       String    @unique @db.ObjectId
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking      BabyTracking @relation(fields: [babyTrackingId], references: [id])
+  babyTrackingId    String       @unique @db.ObjectId
   totalAmount       Float
   leftBreastAmount  Float?
   rightBreastAmount Float?
@@ -386,48 +386,84 @@ model PumpingEntry {
 }
 
 model FeedingEntry {
-  id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  baseEntry     BaseEntry     @relation(fields: [baseEntryId], references: [id])
-  baseEntryId   String        @unique @db.ObjectId
-  feedingMethod FeedingMethod
-  startTime     DateTime
-  endTime       DateTime
-  milkType      MilkType
-  amount        Float // lượng sữa (ml hoặc oz)
-  duration      Int // in minutes
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking   BabyTracking  @relation(fields: [babyTrackingId], references: [id])
+  babyTrackingId String        @unique @db.ObjectId
+  feedingMethod  FeedingMethod
+  startTime      DateTime
+  endTime        DateTime
+  milkType       MilkType
+  amount         Float // lượng sữa (ml hoặc oz)
+  duration       Int // in minutes
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model DiaperEntry {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  baseEntry   BaseEntry    @relation(fields: [baseEntryId], references: [id])
-  baseEntryId String       @unique @db.ObjectId
-  reason      DiaperReason
-  time        DateTime
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking   BabyTracking @relation(fields: [babyTrackingId], references: [id])
+  babyTrackingId String       @unique @db.ObjectId
+  reason         DiaperReason
+  time           DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model SleepEntry {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  baseEntry   BaseEntry @relation(fields: [baseEntryId], references: [id])
-  baseEntryId String    @unique @db.ObjectId
-  startTime   DateTime
-  endTime     DateTime
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking   BabyTracking @relation(fields: [babyTrackingId], references: [id])
+  babyTrackingId String       @unique @db.ObjectId
+  startTime      DateTime
+  endTime        DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-enum EntryType {
-  PUMPING
-  FEEDING
-  DIAPER
-  SLEEP
-  SOLID_FOOD
+model SolidFoodEntry {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking   BabyTracking   @relation(fields: [babyTrackingId], references: [id])
+  babyTrackingId String         @unique @db.ObjectId
+  startTime      DateTime
+  endTime        DateTime
+  foodName       String
+  preparation    FoodTexture
+  foodAmount     String
+  unit           FoodUnit
+  preference     FoodPreference
+  ingredient     String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+enum BabyTrackingType {
+  PUMPING // Hút sữa
+  FEEDING // Cho ăn
+  DIAPER // Thay bỉm
+  SLEEP // Ngủ
+  SOLID_FOOD // 
+}
+
+enum FoodTexture {
+  PUREED // Xay nhuyễn
+  MASHED // Nghiền nhỏ
+  SOFT // Mềm
+  CHUNKY // Thô
+}
+
+enum FoodUnit {
+  BOWL // Bát
+  GRAM // Gram
+  ML // Ml
+}
+
+enum FoodPreference {
+  LOVED // Rất thích
+  LIKED // Thích
+  NEUTRAL // Bình thường
+  DISLIKED // Không thích
 }
 
 enum FeedingMethod {

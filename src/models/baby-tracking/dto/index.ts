@@ -1,79 +1,87 @@
+import { dateSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 
 // Enums
-const EntryType = z.enum([
+export const babyTrackingTypeSchema = z.enum([
   'PUMPING',
   'FEEDING',
   'DIAPER',
   'SLEEP',
   'SOLID_FOOD',
 ]);
+export type BabyTrackingType = z.infer<typeof babyTrackingTypeSchema>;
+
 const FeedingMethod = z.enum(['BREAST', 'BOTTLE']);
 const MilkType = z.enum(['BREAST_MILK', 'FORMULA']);
 const DiaperReason = z.enum(['PEE', 'POO', 'BOTH', 'DRY_CHANGE']);
 
-// Base schemas
+// Base schema
 const BaseEntrySchema = z.object({
+  date: dateSchema,
   note: z.string().optional(),
-  imageUrl: z.string().optional(),
+  imageUrls: z.array(z.string()).optional(),
+  childId: z.string(),
 });
 
 // Specific entry schemas
-const PumpingEntrySchema = z.object({
-  pumpCount: z.number().int().positive(),
-  totalAmount: z.number().positive(),
-  leftBreastAmount: z.number().positive().optional(),
-  rightBreastAmount: z.number().positive().optional(),
+const PumpingEntrySchema = BaseEntrySchema.extend({
+  type: z.literal('PUMPING'),
+  data: z.object({
+    totalAmount: z.number().positive(),
+    leftBreastAmount: z.number().positive().optional(),
+    rightBreastAmount: z.number().positive().optional(),
+  }),
 });
 
-const FeedingEntrySchema = z.object({
-  feedingMethod: FeedingMethod,
-  startTime: z.date(),
-  endTime: z.date(),
-  milkType: MilkType,
-  amount: z.number().positive(),
-  duration: z.number().int().positive(),
+const FeedingEntrySchema = BaseEntrySchema.extend({
+  type: z.literal('FEEDING'),
+  data: z.object({
+    feedingMethod: FeedingMethod,
+    startTime: dateSchema,
+    endTime: dateSchema,
+    milkType: MilkType,
+    amount: z.number().positive(),
+    duration: z.number().int().positive(),
+  }),
 });
 
-const DiaperEntrySchema = z.object({
-  reason: DiaperReason,
-  time: z.date(),
+const DiaperEntrySchema = BaseEntrySchema.extend({
+  type: z.literal('DIAPER'),
+  data: z.object({
+    reason: DiaperReason,
+    time: dateSchema,
+  }),
 });
 
-const SleepEntrySchema = z.object({
-  startTime: z.date(),
-  endTime: z.date(),
+const SleepEntrySchema = BaseEntrySchema.extend({
+  type: z.literal('SLEEP'),
+  data: z.object({
+    startTime: dateSchema,
+    endTime: dateSchema,
+  }),
 });
 
-const SolidFoodEntrySchema = z.object({
-  startTime: z.date(),
-  endTime: z.date(),
-  foodName: z.string(),
+const SolidFoodEntrySchema = BaseEntrySchema.extend({
+  type: z.literal('SOLID_FOOD'),
+  data: z.object({
+    startTime: dateSchema,
+    endTime: dateSchema,
+    foodName: z.string(),
+  }),
 });
 
 // Create Entry DTO
-const CreateEntrySchema = BaseEntrySchema.extend({
-  type: EntryType,
-}).and(
-  z.discriminatedUnion('type', [
-    z.object({ type: z.literal('PUMPING'), pumpingEntry: PumpingEntrySchema }),
-    z.object({ type: z.literal('FEEDING'), feedingEntry: FeedingEntrySchema }),
-    z.object({ type: z.literal('DIAPER'), diaperEntry: DiaperEntrySchema }),
-    z.object({ type: z.literal('SLEEP'), sleepEntry: SleepEntrySchema }),
-    z.object({
-      type: z.literal('SOLID_FOOD'),
-      solidFoodEntry: SolidFoodEntrySchema,
-    }),
+const createEntrySchema = z.object({
+  data: z.discriminatedUnion('type', [
+    PumpingEntrySchema,
+    FeedingEntrySchema,
+    DiaperEntrySchema,
+    SleepEntrySchema,
+    SolidFoodEntrySchema,
   ]),
-);
+});
 
-export class CreateEntryDto extends createZodDto(CreateEntrySchema) {}
+export class CreateEntryDto extends createZodDto(createEntrySchema) {}
 
-// Update Entry DTO
-const UpdateEntrySchema = CreateEntrySchema.partial();
-
-export class UpdateEntryDto extends createZodDto(UpdateEntrySchema) {}
-
-export type CreateEntryType = z.infer<typeof CreateEntrySchema>;
-export type UpdateEntryType = z.infer<typeof UpdateEntrySchema>;
+export type CreateEntrySchema = z.infer<typeof createEntrySchema>;

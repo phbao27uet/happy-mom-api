@@ -5,12 +5,12 @@ import {
   Body,
   Param,
   Delete,
-  Put,
+  Patch,
   Query,
 } from '@nestjs/common';
 import { BabyTrackingService } from './services/baby-tracking.service';
-import { CreateEntryDto, UpdateEntryDto } from './dto';
-import { EntryType } from '@prisma/client';
+import { CreateEntryDto } from './dto';
+import { GetBabyTrackingDto } from './dto/get.dto';
 
 @Controller('baby-tracking')
 export class BabyTrackingController {
@@ -22,8 +22,8 @@ export class BabyTrackingController {
   }
 
   @Get()
-  findAll(@Query('type') type?: EntryType) {
-    return this.babyTrackingService.findAll(type);
+  findAll(@Query() queryDto: GetBabyTrackingDto) {
+    return this.babyTrackingService.findAll(queryDto);
   }
 
   @Get(':id')
@@ -31,10 +31,10 @@ export class BabyTrackingController {
     return this.babyTrackingService.findOne(id);
   }
 
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateEntryDto: UpdateEntryDto) {
-    return this.babyTrackingService.update(id, updateEntryDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateEntryDto: UpdateEntryDto) {
+  //   return this.babyTrackingService.update(id, updateEntryDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
