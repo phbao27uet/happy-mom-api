@@ -28,6 +28,7 @@ const BaseEntrySchema = z.object({
 const PumpingEntrySchema = BaseEntrySchema.extend({
   type: z.literal('PUMPING'),
   data: z.object({
+    time: dateSchema,
     totalAmount: z.number().positive(),
     leftBreastAmount: z.number().positive().optional(),
     rightBreastAmount: z.number().positive().optional(),
@@ -85,3 +86,6 @@ const createEntrySchema = z.object({
 export class CreateEntryDto extends createZodDto(createEntrySchema) {}
 
 export type CreateEntrySchema = z.infer<typeof createEntrySchema>;
+
+export * from './get.dto';
+export * from './history.dto';

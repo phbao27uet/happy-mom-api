@@ -5,12 +5,10 @@ import {
   Body,
   Param,
   Delete,
-  Patch,
   Query,
 } from '@nestjs/common';
 import { BabyTrackingService } from './services/baby-tracking.service';
-import { CreateEntryDto } from './dto';
-import { GetBabyTrackingDto } from './dto/get.dto';
+import { CreateEntryDto, GetBabyTrackingDto, GetHistoryDto } from './dto';
 
 @Controller('baby-tracking')
 export class BabyTrackingController {
@@ -24,6 +22,11 @@ export class BabyTrackingController {
   @Get()
   findAll(@Query() queryDto: GetBabyTrackingDto) {
     return this.babyTrackingService.findAll(queryDto);
+  }
+
+  @Get('history')
+  findHistory(@Query() queryDto: GetHistoryDto) {
+    return this.babyTrackingService.findHistory(queryDto);
   }
 
   @Get(':id')

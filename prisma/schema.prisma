@@ -356,7 +356,7 @@ model VaccineInjection {
 
 model BabyTracking {
   id        String           @id @default(auto()) @map("_id") @db.ObjectId
-  date      DateTime
+  date      DateTime // Ngày ghi chú - startOfDay
   note      String?
   imageUrls String[]         @default([])
   type      BabyTrackingType
@@ -377,6 +377,7 @@ model PumpingEntry {
   id                String       @id @default(auto()) @map("_id") @db.ObjectId
   babyTracking      BabyTracking @relation(fields: [babyTrackingId], references: [id])
   babyTrackingId    String       @unique @db.ObjectId
+  time              DateTime
   totalAmount       Float
   leftBreastAmount  Float?
   rightBreastAmount Float?
@@ -394,12 +395,13 @@ model FeedingEntry {
   endTime        DateTime
   milkType       MilkType
   amount         Float // lượng sữa (ml hoặc oz)
-  duration       Int // in minutes
+  duration       Float // in minutes
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+// Thay bỉm
 model DiaperEntry {
   id             String       @id @default(auto()) @map("_id") @db.ObjectId
   babyTracking   BabyTracking @relation(fields: [babyTrackingId], references: [id])

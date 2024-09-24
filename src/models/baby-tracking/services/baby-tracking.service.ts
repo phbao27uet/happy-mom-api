@@ -1,12 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEntryDto } from '../dto';
-import { BabyTrackingType } from '@prisma/client';
+import { BabyTrackingType, Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/prisma';
-import { GetBabyTrackingDto } from '../dto/get.dto';
+import { GetBabyTrackingDto, GetHistoryDto } from '../dto';
+import { groupBy } from 'lodash';
+import {
+  BabyTrackingWithPumping,
+  BabyTrackingWithPumpingRecord,
+  PumpingService,
+} from './pumping.service';
 
 @Injectable()
 export class BabyTrackingService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private pumpingService: PumpingService,
+  ) {}
 
   private relationNameMap: Record<BabyTrackingType, string> = {
     [BabyTrackingType.PUMPING]: 'pumpingEntry',
@@ -35,20 +44,71 @@ export class BabyTrackingService {
     });
   }
 
-  async findAll(dto?: GetBabyTrackingDto) {
-    const where = dto?.type ? { type: dto.type } : {};
+  async findAll(dto: GetBabyTrackingDto) {
+    const where: Prisma.BabyTrackingWhereInput = {
+      type: dto.type,
+      childId: dto.childId,
+    };
+
+    if (dto.startDate && dto.endDate) {
+      where.date = {
+        gte: new Date(dto.startDate),
+        lte: new Date(dto.endDate),
+      };
+    }
+
     const res = await this.prisma.babyTracking.findMany({
       where,
       include: {
-        pumpingEntry: true,
-        feedingEntry: true,
-        diaperEntry: true,
-        sleepEntry: true,
-        solidFoodEntry: true,
+        [this.relationNameMap[dto.type]]: true,
       },
     });
 
-    return res;
+    const groupByDate = groupBy(res, (entry) => {
+      if (dto.queryType === 'DAY') {
+        return entry.date.toISOString().split('T')[0];
+      } else if (dto.queryType === 'MONTH') {
+        return entry.date.toISOString().split('T')[0].slice(0, 7);
+      } else {
+        return entry.date.toISOString().split('T')[0].slice(0, 4);
+      }
+    });
+
+    switch (dto.type) {
+      case BabyTrackingType.PUMPING:
+        return this.pumpingService.formatData(
+          groupByDate as unknown as BabyTrackingWithPumpingRecord,
+        );
+      default:
+        return groupByDate;
+    }
+  }
+
+  async findHistory(dto: GetHistoryDto) {
+    const where: Prisma.BabyTrackingWhereInput = {
+      type: dto.type,
+      childId: dto.childId,
+      date: {
+        gte: new Date(dto.year),
+        lt: new Date(Number(dto.year) + 1, 0, 1),
+      },
+    };
+
+    const res = await this.prisma.babyTracking.findMany({
+      where,
+      include: {
+        [this.relationNameMap[dto.type]]: true,
+      },
+    });
+
+    switch (dto.type) {
+      case BabyTrackingType.PUMPING:
+        return this.pumpingService.history(
+          res as unknown as BabyTrackingWithPumping,
+        );
+      default:
+        return res;
+    }
   }
 
   async findOne(id: string) {
