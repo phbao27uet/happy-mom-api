@@ -2,6 +2,8 @@ import { DefaultFindAllQueryDto } from '@models/base';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/prisma';
+import { CreateArticleDto } from './dto';
+import { UpdateArticleDto } from './dto/update.dto';
 
 @Injectable()
 export class ArticlesService {
@@ -121,6 +123,29 @@ export class ArticlesService {
     return this.prisma.article.findMany({
       where: {
         subCategoryId,
+      },
+    });
+  }
+
+  async create(data: CreateArticleDto) {
+    return this.prisma.article.create({
+      data,
+    });
+  }
+
+  async update(id: string, data: UpdateArticleDto) {
+    return this.prisma.article.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  async remove(id: string) {
+    return this.prisma.article.delete({
+      where: {
+        id,
       },
     });
   }
