@@ -366,11 +366,11 @@ model BabyTracking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  pumpingEntry   PumpingEntry?
-  feedingEntry   FeedingEntry?
-  diaperEntry    DiaperEntry?
-  sleepEntry     SleepEntry?
-  solidFoodEntry SolidFoodEntry?
+  pumpingEntry   PumpingEntry? // Hút sữa
+  feedingEntry   FeedingEntry? // Theo dõi lượng sữa
+  diaperEntry    DiaperEntry? // Thay bỉm
+  sleepEntry     SleepEntry? // Ngủ
+  solidFoodEntry SolidFoodEntry? // Ăn dặm 
 }
 
 model PumpingEntry {
