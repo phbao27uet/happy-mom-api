@@ -3,6 +3,8 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/prisma';
 import { format } from 'date-fns';
 import { chain, mapValues, sumBy } from 'lodash';
+import { TrackingCategory } from '../enums';
+import { GroupedData } from '../interfaces';
 
 export type BabyTrackingWithPumping = Prisma.BabyTrackingGetPayload<{
   include: { pumpingEntry: true };
@@ -10,29 +12,6 @@ export type BabyTrackingWithPumping = Prisma.BabyTrackingGetPayload<{
 
 export interface BabyTrackingWithPumpingRecord {
   [date: string]: BabyTrackingWithPumping;
-}
-
-export enum MilkAmountCategory {
-  LOW = 'LOW',
-  SLIGHTLY_LOW = 'SLIGHTLY_LOW',
-  NORMAL = 'NORMAL',
-  HIGH = 'HIGH',
-}
-
-export interface GroupedPumpingData {
-  [month: string]: {
-    data: {
-      [day: string]: {
-        status: MilkAmountCategory;
-      };
-    };
-    totals: {
-      LOW: number;
-      SLIGHTLY_LOW: number;
-      NORMAL: number;
-      HIGH: number;
-    };
-  };
 }
 
 @Injectable()
@@ -81,15 +60,13 @@ export class PumpingService {
     return res;
   }
 
-  async history(data: BabyTrackingWithPumping): Promise<GroupedPumpingData> {
+  async history(data: BabyTrackingWithPumping): Promise<GroupedData> {
     const groupedData = this.groupPumpingDataByMonthAndDay(data);
 
     return groupedData;
   }
 
-  groupPumpingDataByMonthAndDay(
-    data: BabyTrackingWithPumping,
-  ): GroupedPumpingData {
+  groupPumpingDataByMonthAndDay(data: BabyTrackingWithPumping): GroupedData {
     const res = chain(data)
       .groupBy((item) => format(new Date(item.date), 'yyyy-MM'))
       .mapValues((groupByMonth) => {
@@ -127,15 +104,15 @@ export class PumpingService {
     return res.value();
   }
 
-  categorizeMilkAmount(amount: number): MilkAmountCategory {
+  categorizeMilkAmount(amount: number): TrackingCategory {
     if (amount < 50) {
-      return MilkAmountCategory.LOW;
+      return TrackingCategory.LOW;
     } else if (amount >= 50 && amount < 150) {
-      return MilkAmountCategory.SLIGHTLY_LOW;
+      return TrackingCategory.SLIGHTLY_LOW;
     } else if (amount >= 150 && amount < 250) {
-      return MilkAmountCategory.NORMAL;
+      return TrackingCategory.NORMAL;
     } else {
-      return MilkAmountCategory.HIGH;
+      return TrackingCategory.HIGH;
     }
   }
 }

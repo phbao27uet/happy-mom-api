@@ -7,14 +7,18 @@ import { groupBy } from 'lodash';
 import {
   BabyTrackingWithPumping,
   BabyTrackingWithPumpingRecord,
+  BabyTrackingWithSleeping,
+  BabyTrackingWithSleepingRecord,
   PumpingService,
-} from './pumping.service';
+  SleepingService,
+} from '.';
 
 @Injectable()
 export class BabyTrackingService {
   constructor(
     private prisma: PrismaService,
     private pumpingService: PumpingService,
+    private sleepingService: SleepingService,
   ) {}
 
   private relationNameMap: Record<BabyTrackingType, string> = {
@@ -79,6 +83,10 @@ export class BabyTrackingService {
         return this.pumpingService.formatData(
           groupByDate as unknown as BabyTrackingWithPumpingRecord,
         );
+      case BabyTrackingType.SLEEP:
+        return this.sleepingService.formatData(
+          groupByDate as unknown as BabyTrackingWithSleepingRecord,
+        );
       default:
         return groupByDate;
     }
@@ -105,6 +113,10 @@ export class BabyTrackingService {
       case BabyTrackingType.PUMPING:
         return this.pumpingService.history(
           res as unknown as BabyTrackingWithPumping,
+        );
+      case BabyTrackingType.SLEEP:
+        return this.sleepingService.history(
+          res as unknown as BabyTrackingWithSleeping,
         );
       default:
         return res;

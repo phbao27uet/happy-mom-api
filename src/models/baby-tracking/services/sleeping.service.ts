@@ -1,132 +1,111 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/prisma';
+import { differenceInMinutes, format } from 'date-fns';
+import { chain, mapValues, sumBy } from 'lodash';
+import { GroupedData } from '../interfaces';
+import { TrackingCategory } from '../enums';
 
-export type BabyTrackingWithFeeding = Prisma.BabyTrackingGetPayload<{
+export type BabyTrackingWithSleeping = Prisma.BabyTrackingGetPayload<{
   include: { sleepEntry: true };
 }>[];
 
-export interface BabyTrackingWithFeedingRecord {
-  [date: string]: BabyTrackingWithFeeding;
-}
-
-export enum MilkAmountCategory {
-  LOW = 'LOW',
-  SLIGHTLY_LOW = 'SLIGHTLY_LOW',
-  NORMAL = 'NORMAL',
-  HIGH = 'HIGH',
-}
-
-export interface GroupedPumpingData {
-  [month: string]: {
-    data: {
-      [day: string]: {
-        status: MilkAmountCategory;
-      };
-    };
-    totals: {
-      low: number;
-      slightlyLow: number;
-      normal: number;
-      high: number;
-    };
-  };
+export interface BabyTrackingWithSleepingRecord {
+  [date: string]: BabyTrackingWithSleeping;
 }
 
 @Injectable()
-export class FeedingService {
+export class SleepingService {
   constructor(private prisma: PrismaService) {}
 
-  //   async formatData(data: BabyTrackingWithFeedingRecord) {
-  //     // const res = mapValues(data, (entry) => {
-  //     //   const count = entry.length;
-  //     //   const total = entry.reduce(
-  //     //     (acc, { feedingEntry }) => {
-  //     //       if (!feedingEntry) {
-  //     //         return acc;
-  //     //       }
-  //     //       return {
-  //     //         totalBreast: acc.totalBreast + pumpingEntry.totalAmount,
-  //     //         leftBreastAmount:
-  //     //           acc.leftBreastAmount + Number(pumpingEntry.leftBreastAmount),
-  //     //         rightBreastAmount:
-  //     //           acc.rightBreastAmount + Number(pumpingEntry.rightBreastAmount),
-  //     //       };
-  //     //     },
-  //     //     {
-  //     //       totalBreast: 0,
-  //     //       leftBreastAmount: 0,
-  //     //       rightBreastAmount: 0,
-  //     //     },
-  //     //   );
-  //     //   const dataSorted = entry.sort(
-  //     //     (a, b) => Number(b.pumpingEntry?.time) - Number(a.pumpingEntry?.time),
-  //     //   );
-  //     //   return {
-  //     //     data: dataSorted,
-  //     //     count,
-  //     //     ...total,
-  //     //     undefined:
-  //     //       total.totalBreast - total.leftBreastAmount - total.rightBreastAmount,
-  //     //     average: total.totalBreast / count,
-  //     //   };
-  //     // });
-  //     // return res;
-  //   }
+  async formatData(data: BabyTrackingWithSleepingRecord) {
+    const res = mapValues(data, (entry) => {
+      const count = entry.length;
 
-  //   async history(data: BabyTrackingWithPumping): Promise<GroupedPumpingData> {
-  //     const groupedData = this.groupPumpingDataByMonthAndDay(data);
+      const totalMinutes = sumBy(entry, (item) => {
+        if (!item.sleepEntry) {
+          return 0;
+        }
 
-  //     return groupedData;
-  //   }
+        return differenceInMinutes(
+          new Date(item.sleepEntry?.endTime),
+          new Date(item.sleepEntry?.startTime),
+        );
+      });
 
-  //   groupPumpingDataByMonthAndDay(
-  //     data: BabyTrackingWithPumping,
-  //   ): GroupedPumpingData {
-  //     return data.reduce((acc, curr) => {
-  //       const month = format(new Date(curr.date), 'yyyy-MM');
-  //       const day = format(new Date(curr.date), 'yyyy-MM-dd');
+      const dataSorted = entry.sort(
+        (a, b) =>
+          Number(b.sleepEntry?.startTime) - Number(a.sleepEntry?.startTime),
+      );
+      return {
+        data: dataSorted,
+        count,
+        totalHours: totalMinutes / 60,
+      };
+    });
+    return res;
+  }
 
-  //       if (!curr.pumpingEntry) {
-  //         return acc;
-  //       }
+  async history(data: BabyTrackingWithSleeping): Promise<GroupedData> {
+    const groupedData = this.groupDataByMonthAndDay(data);
 
-  //       const category = this.categorizeMilkAmount(curr.pumpingEntry.totalAmount);
+    return groupedData;
+  }
 
-  //       if (!acc[month]) {
-  //         acc[month] = {
-  //           data: {},
-  //           totals: {
-  //             low: 0,
-  //             slightlyLow: 0,
-  //             normal: 0,
-  //             high: 0,
-  //           },
-  //         };
-  //       }
+  groupDataByMonthAndDay(data: BabyTrackingWithSleeping): GroupedData {
+    const res = chain(data)
+      .groupBy((item) => format(new Date(item.date), 'yyyy-MM'))
+      .mapValues((groupByMonth) => {
+        const totals = {
+          LOW: 0,
+          SLIGHTLY_LOW: 0,
+          NORMAL: 0,
+          HIGH: 0,
+        };
 
-  //       // Gán trạng thái lượng sữa cho từng ngày
-  //       if (!acc[month].data[day]) {
-  //         acc[month].data[day] = { status: category };
-  //       }
+        const dataInMonth = chain(groupByMonth)
+          .groupBy((item) => format(new Date(item.date), 'yyyy-MM-dd'))
+          .mapValues((groupByDay) => {
+            const totalMinutes = sumBy(groupByDay, (item) => {
+              if (!item.sleepEntry) {
+                return 0;
+              }
 
-  //       // Cập nhật tổng số cho từng loại trạng thái
-  //       switch (category) {
-  //         case MilkAmountCategory.LOW:
-  //           acc[month].totals.low++;
-  //           break;
-  //         case MilkAmountCategory.SLIGHTLY_LOW:
-  //           acc[month].totals.slightlyLow++;
-  //           break;
-  //         case MilkAmountCategory.NORMAL:
-  //           acc[month].totals.normal++;
-  //           break;
-  //         case MilkAmountCategory.HIGH:
-  //           acc[month].totals.high++;
-  //           break;
-  //       }
+              return differenceInMinutes(
+                new Date(item.sleepEntry?.endTime),
+                new Date(item.sleepEntry?.startTime),
+              );
+            });
 
-  //       return acc;
-  //     }, {} as GroupedPumpingData);
-  //   }
+            const totalHours = totalMinutes / 60;
+            const status = this.categorizeHours(totalHours);
+
+            totals[status] += 1;
+
+            return {
+              status,
+            };
+          })
+          .value();
+
+        return {
+          data: dataInMonth,
+          totals,
+        };
+      });
+
+    return res.value();
+  }
+
+  categorizeHours(hours: number): TrackingCategory {
+    if (hours < 8) {
+      return TrackingCategory.LOW;
+    } else if (hours >= 8 && hours < 10) {
+      return TrackingCategory.SLIGHTLY_LOW;
+    } else if (hours >= 10 && hours < 12) {
+      return TrackingCategory.NORMAL;
+    } else {
+      return TrackingCategory.HIGH;
+    }
+  }
 }
