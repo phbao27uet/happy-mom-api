@@ -3,6 +3,7 @@ import { PrismaModule } from '@shared/prisma';
 import { BabyTrackingController } from './baby-tracking.controller';
 import {
   BabyTrackingService,
+  DiaperService,
   FeedingService,
   PumpingService,
   SleepingService,
@@ -16,6 +17,7 @@ import {
     PumpingService,
     SleepingService,
     FeedingService,
+    DiaperService,
   ],
 })
 export class BabyTrackingModule {}
