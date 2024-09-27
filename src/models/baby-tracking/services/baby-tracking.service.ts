@@ -5,10 +5,13 @@ import { PrismaService } from '@shared/prisma';
 import { GetBabyTrackingDto, GetHistoryDto } from '../dto';
 import { groupBy } from 'lodash';
 import {
+  BabyTrackingWithFeeding,
+  BabyTrackingWithFeedingRecord,
   BabyTrackingWithPumping,
   BabyTrackingWithPumpingRecord,
   BabyTrackingWithSleeping,
   BabyTrackingWithSleepingRecord,
+  FeedingService,
   PumpingService,
   SleepingService,
 } from '.';
@@ -19,6 +22,7 @@ export class BabyTrackingService {
     private prisma: PrismaService,
     private pumpingService: PumpingService,
     private sleepingService: SleepingService,
+    private feedingService: FeedingService,
   ) {}
 
   private relationNameMap: Record<BabyTrackingType, string> = {
@@ -87,6 +91,10 @@ export class BabyTrackingService {
         return this.sleepingService.formatData(
           groupByDate as unknown as BabyTrackingWithSleepingRecord,
         );
+      case BabyTrackingType.FEEDING:
+        return this.feedingService.formatData(
+          groupByDate as unknown as BabyTrackingWithFeedingRecord,
+        );
       default:
         return groupByDate;
     }
@@ -117,6 +125,10 @@ export class BabyTrackingService {
       case BabyTrackingType.SLEEP:
         return this.sleepingService.history(
           res as unknown as BabyTrackingWithSleeping,
+        );
+      case BabyTrackingType.FEEDING:
+        return this.feedingService.history(
+          res as unknown as BabyTrackingWithFeeding,
         );
       default:
         return res;
