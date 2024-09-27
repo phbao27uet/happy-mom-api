@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/prisma';
 import { format } from 'date-fns';
-import { mapValues } from 'lodash';
+import { chain, mapValues, sumBy } from 'lodash';
 
 export type BabyTrackingWithPumping = Prisma.BabyTrackingGetPayload<{
   include: { pumpingEntry: true };
@@ -27,10 +27,10 @@ export interface GroupedPumpingData {
       };
     };
     totals: {
-      low: number;
-      slightlyLow: number;
-      normal: number;
-      high: number;
+      LOW: number;
+      SLIGHTLY_LOW: number;
+      NORMAL: number;
+      HIGH: number;
     };
   };
 }
@@ -90,51 +90,41 @@ export class PumpingService {
   groupPumpingDataByMonthAndDay(
     data: BabyTrackingWithPumping,
   ): GroupedPumpingData {
-    return data.reduce((acc, curr) => {
-      const month = format(new Date(curr.date), 'yyyy-MM');
-      const day = format(new Date(curr.date), 'yyyy-MM-dd');
-
-      if (!curr.pumpingEntry) {
-        return acc;
-      }
-
-      const category = this.categorizeMilkAmount(curr.pumpingEntry.totalAmount);
-
-      if (!acc[month]) {
-        acc[month] = {
-          data: {},
-          totals: {
-            low: 0,
-            slightlyLow: 0,
-            normal: 0,
-            high: 0,
-          },
+    const res = chain(data)
+      .groupBy((item) => format(new Date(item.date), 'yyyy-MM'))
+      .mapValues((groupByMonth) => {
+        const totals = {
+          LOW: 0,
+          SLIGHTLY_LOW: 0,
+          NORMAL: 0,
+          HIGH: 0,
         };
-      }
 
-      // Gán trạng thái lượng sữa cho từng ngày
-      if (!acc[month].data[day]) {
-        acc[month].data[day] = { status: category };
-      }
+        const dataInMonth = chain(groupByMonth)
+          .groupBy((item) => format(new Date(item.date), 'yyyy-MM-dd'))
+          .mapValues((groupByDay) => {
+            const totalAmount = sumBy(
+              groupByDay,
+              (item) => item.pumpingEntry?.totalAmount || 0,
+            );
 
-      // Cập nhật tổng số cho từng loại trạng thái
-      switch (category) {
-        case MilkAmountCategory.LOW:
-          acc[month].totals.low++;
-          break;
-        case MilkAmountCategory.SLIGHTLY_LOW:
-          acc[month].totals.slightlyLow++;
-          break;
-        case MilkAmountCategory.NORMAL:
-          acc[month].totals.normal++;
-          break;
-        case MilkAmountCategory.HIGH:
-          acc[month].totals.high++;
-          break;
-      }
+            const status = this.categorizeMilkAmount(totalAmount);
 
-      return acc;
-    }, {} as GroupedPumpingData);
+            totals[status] += 1;
+
+            return {
+              status,
+            };
+          })
+          .value();
+
+        return {
+          data: dataInMonth,
+          totals,
+        };
+      });
+
+    return res.value();
   }
 
   categorizeMilkAmount(amount: number): MilkAmountCategory {

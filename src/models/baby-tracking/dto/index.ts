@@ -57,10 +57,19 @@ const DiaperEntrySchema = BaseEntrySchema.extend({
 
 const SleepEntrySchema = BaseEntrySchema.extend({
   type: z.literal('SLEEP'),
-  data: z.object({
-    startTime: dateSchema,
-    endTime: dateSchema,
-  }),
+  data: z
+    .object({
+      startTime: dateSchema,
+      endTime: dateSchema,
+    })
+    .superRefine((data, ctx) => {
+      if (data.startTime > data.endTime) {
+        return ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Thời gian bắt đầu không thể lớn hơn thời gian kết thúc',
+        });
+      }
+    }),
 });
 
 const SolidFoodEntrySchema = BaseEntrySchema.extend({
