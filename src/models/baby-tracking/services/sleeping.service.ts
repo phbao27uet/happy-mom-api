@@ -22,21 +22,33 @@ export class SleepingService {
     const res = mapValues(data, (entry) => {
       const count = entry.length;
 
-      const totalMinutes = sumBy(entry, (item) => {
-        if (!item.sleepEntry) {
-          return 0;
-        }
+      const entryAddOnDiffMinutes = entry.map((item) => {
+        const diffInMinutes = item.sleepEntry
+          ? differenceInMinutes(
+              new Date(item.sleepEntry?.endTime),
+              new Date(item.sleepEntry?.startTime),
+            )
+          : 0;
 
-        return differenceInMinutes(
-          new Date(item.sleepEntry?.endTime),
-          new Date(item.sleepEntry?.startTime),
-        );
+        return {
+          ...item,
+          sleepEntry: {
+            ...item.sleepEntry,
+            diffInMinutes,
+          },
+        };
       });
 
-      const dataSorted = entry.sort(
+      const totalMinutes = sumBy(
+        entryAddOnDiffMinutes,
+        (item) => item.sleepEntry.diffInMinutes,
+      );
+
+      const dataSorted = entryAddOnDiffMinutes.sort(
         (a, b) =>
           Number(b.sleepEntry?.startTime) - Number(a.sleepEntry?.startTime),
       );
+
       return {
         data: dataSorted,
         count,
