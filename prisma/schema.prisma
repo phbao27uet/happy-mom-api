@@ -88,6 +88,10 @@ model Child {
   updatedAt         DateTime           @updatedAt
   babyDiaries       BabyDiary[]
   vaccineInjections VaccineInjection[]
+
+  pregnancyWeek       PregnancyWeek?       @relation("ChildPregnancyWeek")
+  pregnancyWeekDetail PregnancyWeekDetail? @relation("ChildPregnancyWeekDetail")
+  appointment         Appointment?         @relation("ChildAppointment")
 }
 
 model Group {
@@ -351,6 +355,46 @@ model VaccineInjection {
   updatedAt     DateTime               @updatedAt
 
   @@unique([vaccineDoesId, childId])
+}
+
+// THEO DÕI THAI KỲ
+
+// Thai nhi theo tuần
+model PregnancyWeek {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  weekNumber  Int // Tuần thai
+  progress    Float? // Tiến độ thai kỳ (%)
+  description String? // Mô tả về sự phát triển của thai nhi trong tuần đó
+  childId     String  @unique @db.ObjectId // Đảm bảo childId là duy nhất
+  child       Child   @relation("ChildPregnancyWeek", fields: [childId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Mô tả thông tin tuần thai
+model PregnancyWeekDetail {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  weekNumber  Int // Tuần thai
+  description String? // Mô tả về sự phát triển của thai nhi trong tuần đó
+  childId     String  @unique @db.ObjectId // Đảm bảo childId là duy nhất
+  child       Child   @relation("ChildPregnancyWeekDetail", fields: [childId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Lịch khám thai
+model Appointment {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  weekNumber Int // Tuần thai
+  content    String? // Nội dung ghi chú về buổi khám
+  status     Boolean @default(false) // Trạng thái của buổi khám (false = Chưa hoàn thành, true = Đã hoàn thành)
+  childId    String  @unique @db.ObjectId // Đảm bảo childId là duy nhất
+  child      Child   @relation("ChildAppointment", fields: [childId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum AlarmType {

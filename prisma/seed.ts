@@ -871,6 +871,8 @@ async function main() {
 
   await generateVaccine();
 
+  await import('./pregnancy-tracking.seed');
+
   console.log('seed success');
 }
 
