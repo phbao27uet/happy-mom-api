@@ -21,6 +21,7 @@ import { AlarmsModule } from './alarms/alarms.module';
 import { VaccinesModule } from './vaccines/vaccines.module';
 import { NotificationsModule } from '@shared/notifications/notifications.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { BabyTrackingModule } from './baby-tracking/baby-tracking.module';
 
 @Module({
   imports: [
@@ -46,8 +47,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     FoodsModule,
     AlarmsModule,
     VaccinesModule,
-
     NotificationsModule,
+    BabyTrackingModule,
   ],
   controllers: [AppController],
   providers: [

@@ -88,6 +88,7 @@ model Child {
   updatedAt         DateTime           @updatedAt
   babyDiaries       BabyDiary[]
   vaccineInjections VaccineInjection[]
+  baseEntries       BabyTracking[]
 }
 
 model Group {
@@ -351,6 +352,137 @@ model VaccineInjection {
   updatedAt     DateTime               @updatedAt
 
   @@unique([vaccineDoesId, childId])
+}
+
+model BabyTracking {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  date      DateTime // Ngày ghi chú - startOfDay
+  note      String?
+  imageUrls String[]         @default([])
+  type      BabyTrackingType
+  childId   String           @db.ObjectId
+  child     Child            @relation(fields: [childId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pumpingEntry   PumpingEntry? // Hút sữa
+  feedingEntry   FeedingEntry? // Theo dõi lượng sữa
+  diaperEntry    DiaperEntry? // Thay bỉm
+  sleepEntry     SleepEntry? // Ngủ
+  solidFoodEntry SolidFoodEntry? // Ăn dặm 
+}
+
+model PumpingEntry {
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking      BabyTracking @relation(fields: [babyTrackingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  babyTrackingId    String       @unique @db.ObjectId
+  time              DateTime
+  totalAmount       Float
+  leftBreastAmount  Float?
+  rightBreastAmount Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FeedingEntry {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking   BabyTracking  @relation(fields: [babyTrackingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  babyTrackingId String        @unique @db.ObjectId
+  feedingMethod  FeedingMethod
+  startTime      DateTime
+  endTime        DateTime
+  milkType       MilkType
+  amount         Float // lượng sữa (ml hoặc oz)
+  duration       Float // in minutes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Thay bỉm
+model DiaperEntry {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking   BabyTracking @relation(fields: [babyTrackingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  babyTrackingId String       @unique @db.ObjectId
+  reason         DiaperReason
+  time           DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SleepEntry {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking   BabyTracking @relation(fields: [babyTrackingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  babyTrackingId String       @unique @db.ObjectId
+  startTime      DateTime
+  endTime        DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SolidFoodEntry {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  babyTracking   BabyTracking   @relation(fields: [babyTrackingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  babyTrackingId String         @unique @db.ObjectId
+  startTime      DateTime
+  endTime        DateTime
+  foodName       String
+  preparation    FoodTexture
+  foodAmount     Float
+  unit           FoodUnit
+  preference     FoodPreference
+  ingredient     String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+enum BabyTrackingType {
+  PUMPING // Hút sữa
+  FEEDING // Cho ăn
+  DIAPER // Thay bỉm
+  SLEEP // Ngủ
+  SOLID_FOOD // Ăn dặm
+}
+
+enum FoodTexture {
+  PUREED // Xay nhuyễn
+  MASHED // Nghiền nhỏ
+  SOFT // Mềm
+  CHUNKY // Thô
+}
+
+enum FoodUnit {
+  BOWL // Bát
+  GRAM // Gram
+  ML // Ml
+}
+
+enum FoodPreference {
+  LOVED // Rất thích
+  LIKED // Thích
+  NEUTRAL // Bình thường
+  DISLIKED // Không thích
+}
+
+enum FeedingMethod {
+  BREAST // Bú mẹ
+  BOTTLE // Bú bình
+}
+
+enum MilkType {
+  BREAST_MILK // Sữa mẹ
+  FORMULA // Sữa công thức
+}
+
+enum DiaperReason {
+  PEE // Bé tè
+  POO // Bé ị
+  BOTH // Bé vừa tè vừa ị
+  DRY_CHANGE // Bỉm khô thích thì thay
 }
 
 enum AlarmType {
