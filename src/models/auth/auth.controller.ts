@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CredentialsDto } from './dto';
+import { CredentialsDto, PushTokenDto } from './dto';
 import { GetCurrentId } from 'src/shared/decorators/get-current-user-id.decorator';
 import { RtGuard } from './guards/rt.guard';
 import { GetRt } from '@shared/decorators';
@@ -56,6 +56,15 @@ export class AuthController {
     @GetCurrentId() currentId: string,
   ) {
     return this.authService.changePassword(currentId, changePasswordDto);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('push-token')
+  async updatePushToken(
+    @Body() pushTokenDto: PushTokenDto,
+    @GetCurrentId() currentId: string,
+  ) {
+    return this.authService.updatePushToken(currentId, pushTokenDto.token);
   }
 
   @UseGuards(RtGuard)
