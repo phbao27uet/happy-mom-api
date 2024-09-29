@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { BabyTrackingService } from './services/baby-tracking.service';
 import { CreateEntryDto, GetBabyTrackingDto, GetHistoryDto } from './dto';
+import { Auth } from '@shared/decorators';
 
+@Auth('USER')
 @Controller('baby-tracking')
 export class BabyTrackingController {
   constructor(private readonly babyTrackingService: BabyTrackingService) {}
