@@ -13,10 +13,13 @@ import {
   BabyTrackingWithPumpingRecord,
   BabyTrackingWithSleeping,
   BabyTrackingWithSleepingRecord,
+  BabyTrackingWithSolidFood,
+  BabyTrackingWithSolidFoodRecord,
   DiaperService,
   FeedingService,
   PumpingService,
   SleepingService,
+  SolidFoodService,
 } from '.';
 
 @Injectable()
@@ -27,6 +30,7 @@ export class BabyTrackingService {
     private sleepingService: SleepingService,
     private feedingService: FeedingService,
     private diaperService: DiaperService,
+    private solidFoodService: SolidFoodService,
   ) {}
 
   private relationNameMap: Record<BabyTrackingType, string> = {
@@ -103,6 +107,10 @@ export class BabyTrackingService {
         return this.diaperService.formatData(
           groupByDate as unknown as BabyTrackingWithDiaperRecord,
         );
+      case BabyTrackingType.SOLID_FOOD:
+        return this.solidFoodService.formatData(
+          groupByDate as unknown as BabyTrackingWithSolidFoodRecord,
+        );
       default:
         return groupByDate;
     }
@@ -141,6 +149,10 @@ export class BabyTrackingService {
       case BabyTrackingType.DIAPER:
         return this.diaperService.history(
           res as unknown as BabyTrackingWithDiaper,
+        );
+      case BabyTrackingType.SOLID_FOOD:
+        return this.solidFoodService.history(
+          res as unknown as BabyTrackingWithSolidFood,
         );
       default:
         return res;

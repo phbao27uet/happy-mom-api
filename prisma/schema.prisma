@@ -432,7 +432,7 @@ model SolidFoodEntry {
   endTime        DateTime
   foodName       String
   preparation    FoodTexture
-  foodAmount     String
+  foodAmount     Float
   unit           FoodUnit
   preference     FoodPreference
   ingredient     String
@@ -445,7 +445,7 @@ enum BabyTrackingType {
   FEEDING // Cho ăn
   DIAPER // Thay bỉm
   SLEEP // Ngủ
-  SOLID_FOOD // 
+  SOLID_FOOD // Ăn dặm
 }
 
 enum FoodTexture {

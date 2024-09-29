@@ -74,11 +74,25 @@ const SleepEntrySchema = BaseEntrySchema.extend({
 
 const SolidFoodEntrySchema = BaseEntrySchema.extend({
   type: z.literal('SOLID_FOOD'),
-  data: z.object({
-    startTime: dateSchema,
-    endTime: dateSchema,
-    foodName: z.string(),
-  }),
+  data: z
+    .object({
+      startTime: dateSchema,
+      endTime: dateSchema,
+      foodName: z.string(),
+      preparation: z.enum(['PUREED', 'MASHED', 'SOFT', 'CHUNKY']),
+      foodAmount: z.number().positive(),
+      unit: z.enum(['BOWL', 'GRAM', 'ML']),
+      preference: z.enum(['LOVED', 'LIKED', 'DISLIKED', 'NEUTRAL']),
+      ingredient: z.string(),
+    })
+    .superRefine((data, ctx) => {
+      if (data.startTime > data.endTime) {
+        return ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Thời gian bắt đầu không thể lớn hơn thời gian kết thúc',
+        });
+      }
+    }),
 });
 
 // Create Entry DTO

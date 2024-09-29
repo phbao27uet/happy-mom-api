@@ -7,6 +7,7 @@ import {
   FeedingService,
   PumpingService,
   SleepingService,
+  SolidFoodService,
 } from './services';
 
 @Module({
@@ -18,6 +19,7 @@ import {
     SleepingService,
     FeedingService,
     DiaperService,
+    SolidFoodService,
   ],
 })
 export class BabyTrackingModule {}
