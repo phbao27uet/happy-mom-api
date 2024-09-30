@@ -92,6 +92,7 @@ model Child {
   pregnancyWeeks       PregnancyWeek[]       @relation("ChildPregnancyWeeks")
   pregnancyWeekDetails PregnancyWeekDetail[] @relation("ChildPregnancyWeekDetails")
   appointments         Appointment[]         @relation("ChildAppointments")
+  babyMonitoring       BabyMonitoring?       @relation("ChildBabyMonitoring")
 }
 
 model Group {
@@ -401,6 +402,19 @@ model Appointment {
   updatedAt DateTime @updatedAt
 
   @@unique([childId, weekNumber])
+}
+
+// Chỉ số cho bé
+model BabyMonitoring {
+  id                String @id @default(auto()) @map("_id") @db.ObjectId
+  weight            Float?
+  height            Float?
+  headCircumference Float?
+  childId           String @unique @db.ObjectId
+  child             Child  @relation("ChildBabyMonitoring", fields: [childId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum AlarmType {
