@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { MedicinesService } from './medicines.service';
 import { Auth } from '@shared/decorators';
 import { GetListMedicineDto } from './dto';
@@ -15,7 +15,7 @@ export class MedicinesController {
 
   @Auth('USER')
   @Get(':id')
-  async findOne(@Query('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.medicinesService.findOne(id);
   }
 }
