@@ -440,6 +440,29 @@ model SolidFoodEntry {
   updatedAt      DateTime       @updatedAt
 }
 
+model Medicine {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  name         String       @unique
+  description  String
+  imageUrl     String
+  unit         MedicineUnit
+  instructions Json // Hướng dẫn sử dụng [{title: string, type: MedicineInstructionType, description: String}]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+enum MedicineUnit {
+  PRESCRIPTION // Toa thuốc
+  BLISTER // Viên nén
+}
+
+enum MedicineInstructionType {
+  SAFE // An toàn
+  UNSAFE // Không an toàn
+  CAUTION // Cảnh báo
+  SIDE_EFFECT // Tác dụng phụ
+}
+
 enum BabyTrackingType {
   PUMPING // Hút sữa
   FEEDING // Cho ăn
