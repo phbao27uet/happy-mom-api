@@ -61,96 +61,117 @@ const weekDetailData = [
 
 const appointmentData = [
   {
-    weekNumber: 1,
-    content: `Khám thai tuần 1: Kiểm tra sự phát triển của thai nhi.`,
+    gestationalWeek: '1-2',
+    content: `Khám thai tuần 1-2: Kiểm tra sự phát triển của thai nhi.`,
     status: false,
   },
   {
-    weekNumber: 2,
-    content: `Khám thai tuần 2: Kiểm tra sự phát triển của thai nhi.`,
+    gestationalWeek: '3-4',
+    content: `Khám thai tuần 3-4: Kiểm tra sự phát triển của thai nhi.`,
     status: false,
   },
   {
-    weekNumber: 3,
-    content: `Khám thai tuần 3: Kiểm tra sự phát triển của thai nhi.`,
+    gestationalWeek: '5-6',
+    content: `Khám thai tuần 5-6: Kiểm tra sự phát triển của thai nhi.`,
     status: false,
   },
   {
-    weekNumber: 4,
-    content: `Khám thai tuần 4: Kiểm tra sự phát triển của thai nhi.`,
+    gestationalWeek: '7-8',
+    content: `Khám thai tuần 7-8: Kiểm tra sự phát triển của thai nhi.`,
     status: false,
   },
   {
-    weekNumber: 5,
-    content: `Khám thai tuần 5: Kiểm tra sự phát triển của thai nhi.`,
+    gestationalWeek: '9-10',
+    content: `Khám thai tuần 9-10: Kiểm tra sự phát triển của thai nhi.`,
     status: false,
   },
   {
-    weekNumber: 47,
-    content: `Khám thai tuần 47: Kiểm tra sự phát triển của thai nhi.`,
+    gestationalWeek: '46-47',
+    content: `Khám thai tuần 46-47: Kiểm tra sự phát triển của thai nhi.`,
     status: false,
   },
 ];
 
+const getCurrentDate = () => new Date();
+
 async function upsertPregnancyWeek(
   childId: string,
-  week: (typeof weekData)[0],
+  weekDataItem: (typeof weekData)[number],
 ) {
+  const { weekNumber, progress, description } = weekDataItem;
+
   await prisma.pregnancyWeek.upsert({
     where: {
-      childId_weekNumber: { childId, weekNumber: week.weekNumber },
+      childId_weekNumber: {
+        childId,
+        weekNumber,
+      },
     },
-    update: { ...week, childId, createdAt: new Date(), updatedAt: new Date() },
-    create: { ...week, childId, createdAt: new Date(), updatedAt: new Date() },
+    update: {
+      progress,
+      description,
+      updatedAt: getCurrentDate(),
+    },
+    create: {
+      childId,
+      weekNumber,
+      progress,
+      description,
+      createdAt: getCurrentDate(),
+      updatedAt: getCurrentDate(),
+    },
   });
 }
 
-async function upsertPregnancyWeekDetail(
-  childId: string,
-  week: (typeof weekData)[0],
-) {
-  const detail = weekDetailData.find((d) => d.weekNumber === week.weekNumber);
+async function upsertPregnancyWeekDetail(childId: string, weekNumber: number) {
+  const detail = weekDetailData.find((d) => d.weekNumber === weekNumber);
   if (detail) {
     await prisma.pregnancyWeekDetail.upsert({
       where: {
-        childId_weekNumber: { childId, weekNumber: week.weekNumber },
+        childId_weekNumber: {
+          childId,
+          weekNumber,
+        },
       },
       update: {
-        ...detail,
-        childId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        description: detail.description,
+        updatedAt: getCurrentDate(),
       },
       create: {
-        ...detail,
         childId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        weekNumber,
+        description: detail.description,
+        createdAt: getCurrentDate(),
+        updatedAt: getCurrentDate(),
       },
     });
   }
 }
 
-async function upsertAppointment(childId: string, week: (typeof weekData)[0]) {
+async function upsertAppointment(childId: string, gestationalWeek: string) {
   const appointment = appointmentData.find(
-    (a) => a.weekNumber === week.weekNumber,
+    (a) => a.gestationalWeek === gestationalWeek,
   );
   if (appointment) {
     await prisma.appointment.upsert({
       where: {
-        childId_weekNumber: { childId, weekNumber: week.weekNumber },
+        childId_gestationalWeek: {
+          childId,
+          gestationalWeek,
+        },
       },
       update: {
-        ...appointment,
-        childId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        content: appointment.content,
+        status: appointment.status,
+        updatedAt: getCurrentDate(),
       },
       create: {
-        ...appointment,
         childId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        gestationalWeek,
+        content: appointment.content,
+        status: appointment.status,
+        createdAt: getCurrentDate(),
+        updatedAt: getCurrentDate(),
       },
     });
   }
@@ -164,8 +185,19 @@ export async function pregnancyTrackingSeed() {
   for (const child of unbornChildren) {
     for (const week of weekData) {
       await upsertPregnancyWeek(child.id, week);
-      await upsertPregnancyWeekDetail(child.id, week);
-      await upsertAppointment(child.id, week);
+      await upsertPregnancyWeekDetail(child.id, week.weekNumber);
+
+      const correspondingAppointment = appointmentData.find((a) =>
+        a.gestationalWeek
+          .split('-')
+          .some((wk) => parseInt(wk) === week.weekNumber),
+      );
+      if (correspondingAppointment) {
+        await upsertAppointment(
+          child.id,
+          correspondingAppointment.gestationalWeek,
+        );
+      }
     }
   }
 
