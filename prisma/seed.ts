@@ -1,5 +1,6 @@
 import { GuidelineType, PrismaClient } from '@prisma/client';
 import { hashPassword } from 'src/shared/utils/hash';
+import { pregnancyTrackingSeed } from './pregnancy-tracking.seed';
 
 const prisma = new PrismaClient();
 
@@ -871,7 +872,7 @@ async function main() {
 
   await generateVaccine();
 
-  await import('./pregnancy-tracking.seed');
+  await pregnancyTrackingSeed();
 
   console.log('seed success');
 }
