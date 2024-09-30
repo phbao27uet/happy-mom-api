@@ -10,28 +10,33 @@ export class BabyMonitoringsService {
     return this.prisma.babyMonitoring.findUnique({ where: { childId } });
   }
 
-  async update(
+  async updateOrCreateByChildId(
     childId: string,
     data: Partial<BabyMonitoring>,
   ): Promise<BabyMonitoring> {
     const existingMonitoring = await this.findOneByChildId(childId);
 
     if (!existingMonitoring) {
-      throw new NotFoundException(
-        `BabyMonitoring with childId ${childId} not found.`,
-      );
+      const createData = {
+        ...data,
+        childId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      return this.prisma.babyMonitoring.create({
+        data: createData,
+      });
     }
 
-    const updatedMonitoring = await this.prisma.babyMonitoring.update({
-      where: { childId },
-      data: {
-        weight: data.weight,
-        height: data.height,
-        headCircumference: data.headCircumference,
-        updatedAt: new Date(),
-      },
-    });
+    const updateData = {
+      ...data,
+      updatedAt: new Date(),
+    };
 
-    return updatedMonitoring;
+    return this.prisma.babyMonitoring.update({
+      where: { childId },
+      data: updateData,
+    });
   }
 }

@@ -11,18 +11,18 @@ export class BabyMonitoringsController {
 
   @Auth('USER', 'ADMIN')
   @Get('child/:childId')
-  async findOne(
+  async findOneByChildId(
     @Param('childId') childId: string,
   ): Promise<BabyMonitoring | null> {
     return this.babyMonitoringsService.findOneByChildId(childId);
   }
 
   @Auth('USER', 'ADMIN')
-  @Patch(':childId')
-  async update(
+  @Patch('child/:childId')
+  async updateOrCreateByChildId(
     @Param('childId') childId: string,
     @Body() data: Partial<BabyMonitoring>,
   ): Promise<BabyMonitoring> {
-    return this.babyMonitoringsService.update(childId, data);
+    return this.babyMonitoringsService.updateOrCreateByChildId(childId, data);
   }
 }

@@ -24,6 +24,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { PregnancyWeeksModule } from './pregnancy-weeks/pregnancy-weeks.module';
 import { PregnancyWeekDetailsModule } from './pregnancy-week-details/pregnancy-week-details.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { BabyMonitoringsModule } from './baby-monitorings/baby-monitorings.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
     PregnancyWeeksModule,
     PregnancyWeekDetailsModule,
     AppointmentsModule,
+    BabyMonitoringsModule,
   ],
   controllers: [AppController],
   providers: [
