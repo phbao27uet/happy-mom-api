@@ -22,6 +22,7 @@ import { VaccinesModule } from './vaccines/vaccines.module';
 import { NotificationsModule } from '@shared/notifications/notifications.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PregnancyWeeksModule } from './pregnancy-weeks/pregnancy-weeks.module';
+import { PregnancyWeekDetailsModule } from './pregnancy-week-details/pregnancy-week-details.module';
 
 @Module({
   imports: [
@@ -49,7 +50,9 @@ import { PregnancyWeeksModule } from './pregnancy-weeks/pregnancy-weeks.module';
     VaccinesModule,
 
     NotificationsModule,
+
     PregnancyWeeksModule,
+    PregnancyWeekDetailsModule,
   ],
   controllers: [AppController],
   providers: [
