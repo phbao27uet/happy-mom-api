@@ -362,12 +362,15 @@ model VaccineInjection {
 
 // Thai nhi theo tuần
 model PregnancyWeek {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  weekNumber  Int
-  progress    Float?
-  description String?
-  childId     String  @db.ObjectId
-  child       Child   @relation("ChildPregnancyWeeks", fields: [childId], references: [id])
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  weekNumber        Int
+  progress          Float?
+  description       String?
+  weight            Float?
+  height            Float?
+  headCircumference Float?
+  childId           String  @db.ObjectId
+  child             Child   @relation("ChildPregnancyWeeks", fields: [childId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

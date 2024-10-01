@@ -7,31 +7,49 @@ const weekData = [
     weekNumber: 1,
     progress: 10,
     description: `Tuần thai 1: Thai nhi đang hình thành các cơ quan và bộ phận.`,
+    weight: 0.1,
+    height: 0.4,
+    headCircumference: 0.2,
   },
   {
     weekNumber: 2,
     progress: 21.28,
     description: `Tuần thai 2: Thai nhi phát triển nhanh chóng, các bộ phận cơ thể dần hình thành.`,
+    weight: 0.3,
+    height: 0.6,
+    headCircumference: 0.4,
   },
   {
     weekNumber: 3,
     progress: 31.91,
     description: `Tuần thai 3: Bắt đầu xuất hiện các bộ phận sinh dục.`,
+    weight: 0.7,
+    height: 1.0,
+    headCircumference: 0.6,
   },
   {
     weekNumber: 4,
     progress: 42.55,
     description: `Tuần thai 4: Thai nhi bắt đầu có hình dáng giống như em bé.`,
+    weight: 1.2,
+    height: 1.5,
+    headCircumference: 1.0,
   },
   {
     weekNumber: 5,
     progress: 53.19,
     description: `Tuần thai 5: Cơ bắp và hệ thần kinh bắt đầu phát triển.`,
+    weight: 1.8,
+    height: 2.1,
+    headCircumference: 1.5,
   },
   {
     weekNumber: 47,
     progress: 100,
     description: `Tuần thai 47: Thai nhi đã sẵn sàng cho việc sinh nở.`,
+    weight: 3200.0,
+    height: 50.0,
+    headCircumference: 35.0,
   },
 ];
 
@@ -98,7 +116,14 @@ async function upsertPregnancyWeek(
   childId: string,
   weekDataItem: (typeof weekData)[number],
 ) {
-  const { weekNumber, progress, description } = weekDataItem;
+  const {
+    weekNumber,
+    progress,
+    description,
+    weight,
+    height,
+    headCircumference,
+  } = weekDataItem;
 
   await prisma.pregnancyWeek.upsert({
     where: {
@@ -110,6 +135,9 @@ async function upsertPregnancyWeek(
     update: {
       progress,
       description,
+      weight,
+      height,
+      headCircumference,
       updatedAt: getCurrentDate(),
     },
     create: {
@@ -117,6 +145,9 @@ async function upsertPregnancyWeek(
       weekNumber,
       progress,
       description,
+      weight,
+      height,
+      headCircumference,
       createdAt: getCurrentDate(),
       updatedAt: getCurrentDate(),
     },
