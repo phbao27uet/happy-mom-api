@@ -451,6 +451,15 @@ model Medicine {
   updatedAt    DateTime     @updatedAt
 }
 
+model EarlyEducation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum MedicineUnit {
   PRESCRIPTION // Toa thuốc
   BLISTER // Viên nén
