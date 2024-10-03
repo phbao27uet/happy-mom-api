@@ -219,28 +219,50 @@ model Article {
   updatedAt DateTime  @updatedAt
 }
 
+// Cuộc thi/Sự kiện
 model Event {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  thumbnail   String
   title       String
   description String
   startTime   DateTime
   endTime     DateTime
+  rules       String // Quy định về hình thức tham gia
+  prizes      Prize[] // Liên kết với các giải thưởng
+  thumbnail   String // Ảnh đại diện sự kiện
 
-  comments Comment[]
-
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  // Quan hệ với bình luận và người tham gia
+  comments     Comment[]
   participants Participant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+// Cơ cấu giải thưởng
+model Prize {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  eventId     String @db.ObjectId
+  name        String // Tên giải thưởng
+  value       Float // Giá trị giải thưởng
+  description String // Mô tả chi tiết giải thưởng
+
+  // Quan hệ với sự kiện
+  event Event @relation(fields: [eventId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Người tham gia
 model Participant {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   accountId String   @db.ObjectId
   eventId   String   @db.ObjectId
   joinedAt  DateTime @default(now())
-  account   Account  @relation(fields: [accountId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
+
+  // Quan hệ với account và event
+  account Account @relation(fields: [accountId], references: [id])
+  event   Event   @relation(fields: [eventId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
