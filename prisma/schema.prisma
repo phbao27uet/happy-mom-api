@@ -221,18 +221,16 @@ model Article {
 
 // Cuộc thi/Sự kiện
 model Event {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  description String
-  startTime   DateTime
-  endTime     DateTime
-  rules       String // Quy định về hình thức tham gia
-  prizes      Prize[] // Liên kết với các giải thưởng
-  thumbnail   String // Ảnh đại diện sự kiện
-
-  // Quan hệ với bình luận và người tham gia
-  comments     Comment[]
-  participants Participant[]
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String
+  startTime    DateTime
+  endTime      DateTime
+  rules        String? // Quy định về hình thức tham gia, now optional
+  prizes       Prize[] // Liên kết với các giải thưởng
+  thumbnail    String? // Ảnh đại diện sự kiện, now optional
+  comments     Comment[] // Quan hệ với bình luận
+  participants Participant[] // Quan hệ với người tham gia
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
