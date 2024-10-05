@@ -11,9 +11,14 @@ export class ArticlesService {
 
   async findAll(defaultFindAllQuery: DefaultFindAllQueryDto) {
     try {
-      const { perPage = 20, page = 1 } = defaultFindAllQuery;
+      const { perPage = 20, page = 1, searchOne } = defaultFindAllQuery;
 
-      const where: Prisma.ArticleWhereInput = {};
+      const where: Prisma.ArticleWhereInput = {
+        title: {
+          contains: searchOne,
+          mode: 'insensitive',
+        },
+      };
 
       const [total, data] = await Promise.all([
         this.prisma.article.count({
