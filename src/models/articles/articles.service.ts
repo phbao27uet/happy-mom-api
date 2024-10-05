@@ -71,6 +71,11 @@ export class ArticlesService {
                 likes: true,
               },
             },
+            subCategory: {
+              include: {
+                category: true,
+              },
+            },
           },
           skip: page && perPage ? (page - 1) * perPage : undefined,
           take: page && perPage ? perPage : undefined,
@@ -97,6 +102,11 @@ export class ArticlesService {
         id,
       },
       include: {
+        subCategory: {
+          include: {
+            category: true,
+          },
+        },
         comments: true,
         likes: true,
         _count: {
