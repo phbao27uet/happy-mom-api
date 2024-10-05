@@ -80,32 +80,80 @@ const weekDetailData = [
 const appointmentData = [
   {
     gestationalWeek: '1-2',
-    content: `Khám thai tuần 1-2: Kiểm tra sự phát triển của thai nhi.`,
+    content: `
+      <div style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+        <h3 style="font-size: 10px; font-weight: 500; line-height: 14px; text-align: left;">Lần 1: Tuần 5–7</h3>
+        <p style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">Kiểm tra túi phôi trong buồng tử cung</p>
+        <ul style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+          <li>Siêu âm đầu dò âm đạo hoặc Siêu âm bụng đen trắng</li>
+          <li>Khám lâm sàng tổng quát</li>
+        </ul>
+      </div>`,
     status: false,
   },
   {
     gestationalWeek: '3-4',
-    content: `Khám thai tuần 3-4: Kiểm tra sự phát triển của thai nhi.`,
+    content: `
+      <div style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+        <h3 style="font-size: 10px; font-weight: 500; line-height: 14px; text-align: left;">Lần 2: Tuần 8–10</h3>
+        <p style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">Kiểm tra sự phát triển của phôi thai</p>
+        <ul style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+          <li>Siêu âm để nghe tim thai</li>
+          <li>Khám sức khỏe tổng quát</li>
+        </ul>
+      </div>`,
     status: false,
   },
   {
     gestationalWeek: '5-6',
-    content: `Khám thai tuần 5-6: Kiểm tra sự phát triển của thai nhi.`,
+    content: `
+      <div style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+        <h3 style="font-size: 10px; font-weight: 500; line-height: 14px; text-align: left;">Lần 3: Tuần 11–13</h3>
+        <p style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">Kiểm tra sự phát triển và dị tật thai nhi</p>
+        <ul style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+          <li>Siêu âm đo độ mờ da gáy</li>
+          <li>Xét nghiệm máu</li>
+        </ul>
+      </div>`,
     status: false,
   },
   {
     gestationalWeek: '7-8',
-    content: `Khám thai tuần 7-8: Kiểm tra sự phát triển của thai nhi.`,
+    content: `
+      <div style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+        <h3 style="font-size: 10px; font-weight: 500; line-height: 14px; text-align: left;">Lần 4: Tuần 14–16</h3>
+        <p style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">Kiểm tra phát triển của thai nhi và sức khỏe mẹ</p>
+        <ul style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+          <li>Siêu âm và xét nghiệm máu</li>
+          <li>Khám tim mạch cho mẹ</li>
+        </ul>
+      </div>`,
     status: false,
   },
   {
     gestationalWeek: '9-10',
-    content: `Khám thai tuần 9-10: Kiểm tra sự phát triển của thai nhi.`,
+    content: `
+      <div style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+        <h3 style="font-size: 10px; font-weight: 500; line-height: 14px; text-align: left;">Lần 5: Tuần 17–20</h3>
+        <p style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">Kiểm tra toàn diện dị tật và sự phát triển thai nhi</p>
+        <ul style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+          <li>Siêu âm màu 4D</li>
+          <li>Đánh giá sức khỏe tổng thể của mẹ</li>
+        </ul>
+      </div>`,
     status: false,
   },
   {
     gestationalWeek: '46-47',
-    content: `Khám thai tuần 46-47: Kiểm tra sự phát triển của thai nhi.`,
+    content: `
+      <div style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+        <h3 style="font-size: 10px; font-weight: 500; line-height: 14px; text-align: left;">Lần cuối: Tuần 46–47</h3>
+        <p style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">Chuẩn bị sinh và kiểm tra cuối cùng trước khi sinh</p>
+        <ul style="font-size: 10px; font-weight: 400; line-height: 14px; text-align: left;">
+          <li>Siêu âm để xác định vị trí thai nhi</li>
+          <li>Đánh giá sức khỏe cuối cùng của mẹ</li>
+        </ul>
+      </div>`,
     status: false,
   },
 ];
