@@ -1,13 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { Appointment } from '@prisma/client';
+import { Appointment, AppointmentStatus } from '@prisma/client';
 import { PrismaService } from '@shared/prisma';
 
 @Injectable()
 export class AppointmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAllByChild(childId: string): Promise<Appointment[]> {
-    return this.prisma.appointment.findMany({ where: { childId } });
+  async findAllByChild(
+    childId: string,
+    status?: AppointmentStatus,
+  ): Promise<Appointment[]> {
+    const statusFilter = status ? { status } : {};
+    return this.prisma.appointment.findMany({
+      where: {
+        childId,
+        ...statusFilter,
+      },
+    });
   }
 
   async findOne(id: string): Promise<Appointment | null> {
@@ -19,10 +28,17 @@ export class AppointmentsService {
       where: { id },
     });
 
+    if (!appointment) {
+      throw new Error(`Appointment with id ${id} not found`);
+    }
+
     return this.prisma.appointment.update({
       where: { id },
       data: {
-        status: !appointment?.status,
+        status:
+          appointment.status === AppointmentStatus.UNCHECKED
+            ? AppointmentStatus.CHECKED
+            : AppointmentStatus.UNCHECKED,
       },
     });
   }

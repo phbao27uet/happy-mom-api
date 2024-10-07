@@ -394,12 +394,12 @@ model PregnancyWeekDetail {
 
 // Lịch khám thai
 model Appointment {
-  id              String  @id @default(auto()) @map("_id") @db.ObjectId
-  gestationalWeek String? // Không sử dụng @unique ở đây
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  gestationalWeek String?
   content         String?
-  status          Boolean @default(false)
-  childId         String  @db.ObjectId
-  child           Child   @relation("ChildAppointments", fields: [childId], references: [id])
+  status          AppointmentStatus @default(UNCHECKED)
+  childId         String            @db.ObjectId
+  child           Child             @relation("ChildAppointments", fields: [childId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -473,4 +473,9 @@ enum VaccineInjectionStatus {
   INJECTED // Đã tiêm
   NOT_INJECTED // Chưa tiêm
   SKIP // Bỏ qua
+}
+
+enum AppointmentStatus {
+  CHECKED
+  UNCHECKED
 }

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { AppointmentStatus, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -89,7 +89,7 @@ const appointmentData = [
           <li>Khám lâm sàng tổng quát</li>
         </ul>
       </div>`,
-    status: false,
+    status: 'CHECKED',
   },
   {
     gestationalWeek: '3-4',
@@ -102,7 +102,7 @@ const appointmentData = [
           <li>Khám sức khỏe tổng quát</li>
         </ul>
       </div>`,
-    status: false,
+    status: 'UNCHECKED',
   },
   {
     gestationalWeek: '5-6',
@@ -115,7 +115,7 @@ const appointmentData = [
           <li>Xét nghiệm máu</li>
         </ul>
       </div>`,
-    status: false,
+    status: 'CHECKED',
   },
   {
     gestationalWeek: '7-8',
@@ -128,7 +128,7 @@ const appointmentData = [
           <li>Khám tim mạch cho mẹ</li>
         </ul>
       </div>`,
-    status: false,
+    status: 'CHECKED',
   },
   {
     gestationalWeek: '9-10',
@@ -141,7 +141,7 @@ const appointmentData = [
           <li>Đánh giá sức khỏe tổng thể của mẹ</li>
         </ul>
       </div>`,
-    status: false,
+    status: 'UNCHECKED',
   },
   {
     gestationalWeek: '46-47',
@@ -154,7 +154,7 @@ const appointmentData = [
           <li>Đánh giá sức khỏe cuối cùng của mẹ</li>
         </ul>
       </div>`,
-    status: false,
+    status: 'CHECKED',
   },
 ];
 
@@ -231,7 +231,11 @@ async function upsertAppointment(childId: string, gestationalWeek: string) {
   const appointment = appointmentData.find(
     (a) => a.gestationalWeek === gestationalWeek,
   );
+
   if (appointment) {
+    // Chuyển đổi status từ chuỗi thành enum AppointmentStatus
+    const status = appointment.status as AppointmentStatus;
+
     await prisma.appointment.upsert({
       where: {
         childId_gestationalWeek: {
@@ -241,14 +245,14 @@ async function upsertAppointment(childId: string, gestationalWeek: string) {
       },
       update: {
         content: appointment.content,
-        status: appointment.status,
+        status,
         updatedAt: getCurrentDate(),
       },
       create: {
         childId,
         gestationalWeek,
         content: appointment.content,
-        status: appointment.status,
+        status,
         createdAt: getCurrentDate(),
         updatedAt: getCurrentDate(),
       },
