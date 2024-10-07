@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialsDto, PushTokenDto } from './dto';
 import { GetCurrentId } from 'src/shared/decorators/get-current-user-id.decorator';
@@ -9,6 +17,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password';
 import { VerifyOTPDto } from './dto/verify-otp.dto';
+import { Account } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -74,5 +83,12 @@ export class AuthController {
     @GetCurrentId() currentId: string,
   ) {
     return this.authService.refreshTokens(currentId, refreshToken);
+  }
+
+  @Patch(':accountId/pin-code/toggle')
+  async togglePinCodeStatus(
+    @Param('accountId') accountId: string,
+  ): Promise<Account> {
+    return this.authService.togglePinCodeStatus(accountId);
   }
 }

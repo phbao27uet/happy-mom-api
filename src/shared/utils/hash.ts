@@ -12,3 +12,7 @@ export async function isPasswordValid(
   const isValid = await argon2.verify(hashedPassword, password);
   return isValid;
 }
+
+export async function hashPinCode(plainPinCode: string): Promise<string> {
+  return await argon2.hash(plainPinCode);
+}
