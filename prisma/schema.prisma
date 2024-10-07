@@ -196,6 +196,7 @@ model Category {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   name          String        @unique
   description   String?
+  type          CategoryType  @default(ARTICLE)
   subCategories SubCategory[]
 
   createdAt DateTime @default(now())
@@ -212,6 +213,22 @@ model SubCategory {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   articles    Article[]
+  recipes     Recipe[]
+}
+
+// Công thức nấu ăn
+model Recipe {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  thumbnail     String
+  title         String      @unique
+  description   String
+  cookingTime   Int // Thời gian nấu (phút)
+  subCategoryId String      @db.ObjectId
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ingredients   Json // Mảng object ảnh và tên nguyên liệu {name: string, image: string}[]
+  steps         Json // Mảng object mô tả các bước {description: string}[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 // Cẩm nang
@@ -223,9 +240,8 @@ model Article {
   content     String
   images      String[] @default([])
 
-  subCategoryId String @db.ObjectId
-
-  subCategory SubCategory @relation(fields: [subCategoryId], references: [id])
+  subCategoryId String      @db.ObjectId
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
 
   likes     Like[]
   comments  Comment[]
@@ -599,4 +615,9 @@ enum FriendStatus {
   PENDING
   ACCEPTED
   DECLINED
+}
+
+enum CategoryType {
+  RECIPE // Công thức nấu ăn
+  ARTICLE // Cẩm nang
 }
