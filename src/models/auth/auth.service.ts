@@ -303,4 +303,20 @@ export class AuthService {
       },
     });
   }
+
+  async deleteAccount(accountId: string): Promise<boolean> {
+    const account = await this.prisma.account.findUnique({
+      where: { id: accountId },
+    });
+
+    if (!account) {
+      throw new BadRequestException('Tài khoản không tồn tại');
+    }
+
+    await this.prisma.account.delete({
+      where: { id: accountId },
+    });
+
+    return true;
+  }
 }

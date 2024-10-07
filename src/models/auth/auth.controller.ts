@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -90,5 +91,11 @@ export class AuthController {
     @Param('accountId') accountId: string,
   ): Promise<Account> {
     return this.authService.togglePinCodeStatus(accountId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('delete-account')
+  async deleteAccount(@GetCurrentId() currentId: string) {
+    return this.authService.deleteAccount(currentId);
   }
 }
