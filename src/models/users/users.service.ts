@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 import { UpdateUserDto } from './dto';
 
@@ -30,7 +29,6 @@ export class UsersService {
                 })),
               },
               ...dto.userInformation,
-
               ...(dto.childs && {
                 childs: {
                   createMany: {
@@ -38,8 +36,36 @@ export class UsersService {
                   },
                 },
               }),
+              ...(dto.addresses && {
+                addresses: {
+                  create: dto.addresses.map((address) => ({
+                    description: address.description,
+                    isDefault: address.isDefault,
+                  })),
+                },
+              }),
             },
-            update: {},
+            update: {
+              pregnancyStatus: dto.pregnancyStatus,
+              ...(dto.userInformation && {
+                ...dto.userInformation,
+              }),
+              ...(dto.childs && {
+                childs: {
+                  createMany: {
+                    data: dto.childs,
+                  },
+                },
+              }),
+              ...(dto.addresses && {
+                addresses: {
+                  create: dto.addresses.map((address) => ({
+                    description: address.description,
+                    isDefault: address.isDefault,
+                  })),
+                },
+              }),
+            },
           },
         },
       },

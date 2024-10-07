@@ -4,6 +4,11 @@ import { z } from 'nestjs-zod/z';
 
 const genderSchema = z.enum(['MALE', 'FEMALE', 'OTHER']);
 
+const addressSchema = z.object({
+  description: z.string(),
+  isDefault: z.boolean().optional().default(false),
+});
+
 const updateUserSchema = z.object({
   pregnancyStatus: z.enum([
     'WISHING',
@@ -51,6 +56,7 @@ const updateUserSchema = z.object({
         }),
     )
     .optional(),
+  addresses: z.array(addressSchema).optional(),
 });
 
 export class UpdateUserDto extends createZodDto(updateUserSchema) {}

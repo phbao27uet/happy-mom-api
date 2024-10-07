@@ -35,14 +35,15 @@ model Account {
   friendOf     Friend[]      @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
 
   pinCode PinCode?
-  Device  Device[]
+  device  Device[]
 }
 
 model PinCode {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
   pinCode   String // Mã PIN đã được hash
-  account   Account  @relation(fields: [accountId], references: [id])
-  accountId String   @unique @db.ObjectId // Đảm bảo mỗi tài khoản chỉ có một mã PIN
+  account   Account @relation(fields: [accountId], references: [id])
+  accountId String  @unique @db.ObjectId // Đảm bảo mỗi tài khoản chỉ có một mã PIN
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -72,7 +73,6 @@ model User {
   fullName    String?
   dob         DateTime?
   gender      Gender?
-  address     String?
   province    String?
   district    String?
   ward        String?
@@ -84,6 +84,20 @@ model User {
 
   childs      Child[]
   memberships Membership[]
+
+  addresses Address[]
+}
+
+model Address {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String  @db.ObjectId
+  description String
+  isDefault   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Friend {
