@@ -27,6 +27,7 @@ import { EarlyEducationsModule } from './early-educations/early-educations.modul
 import { FriendsModule } from './friends/friends.module';
 import { PinCodeModule } from './pin-code/pin-code.module';
 import { DevicesModule } from './devices/devices.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { DevicesModule } from './devices/devices.module';
     FriendsModule,
     PinCodeModule,
     DevicesModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [

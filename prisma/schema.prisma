@@ -509,6 +509,31 @@ model EarlyEducation {
   updatedAt   DateTime @updatedAt
 }
 
+// Gói cước, thanh toán
+
+model Subscription {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String @unique
+  price    Int // Giá của gói đăng ký
+  duration Int // Số ngày: 7 cho dùng thử, 30 cho 1 tháng, -1 cho trọn đời
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  features Feature[]
+}
+
+model Feature {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  description    String
+  subscriptionId String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+}
+
 enum MedicineUnit {
   PRESCRIPTION // Toa thuốc
   BLISTER // Viên nén
