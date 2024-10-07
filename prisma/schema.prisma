@@ -214,6 +214,7 @@ model SubCategory {
   articles    Article[]
 }
 
+// Cẩm nang
 model Article {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   thumbnail   String
@@ -304,6 +305,7 @@ model Guideline {
   updatedAt   DateTime      @updatedAt
 }
 
+// ======== Báo thức ========
 model Alarm {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   type     AlarmType
@@ -326,6 +328,9 @@ model Interval {
   alarmId String @unique @db.ObjectId
 }
 
+// ======== Báo thức ========
+
+// ===== Tiêm phòng ====
 model Vaccine {
   id                      String        @id @default(auto()) @map("_id") @db.ObjectId
   name                    String        @unique
@@ -367,6 +372,9 @@ model VaccineInjection {
   @@unique([vaccineDoesId, childId])
 }
 
+// ===== Tiêm phòng ====
+
+// ===== Theo dõi em bé =====
 model BabyTracking {
   id        String           @id @default(auto()) @map("_id") @db.ObjectId
   date      DateTime // Ngày ghi chú - startOfDay
@@ -452,6 +460,8 @@ model SolidFoodEntry {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
+
+// ===== Theo dõi em bé =====
 
 model Medicine {
   id           String       @id @default(auto()) @map("_id") @db.ObjectId
