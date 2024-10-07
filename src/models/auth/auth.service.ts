@@ -291,7 +291,7 @@ export class AuthService {
     return res;
   }
 
-  async togglePinCodeStatus(accountId: string): Promise<Account> {
+  async inActivePinCodeStatus(accountId: string): Promise<Account> {
     const pinCodeActive = await this.prisma.account.findUnique({
       where: { id: accountId },
     });

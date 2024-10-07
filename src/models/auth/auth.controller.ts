@@ -3,22 +3,21 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { Account } from '@prisma/client';
+import { GetRt } from '@shared/decorators';
+import { GetCurrentId } from 'src/shared/decorators/get-current-user-id.decorator';
 import { AuthService } from './auth.service';
 import { CredentialsDto, PushTokenDto } from './dto';
-import { GetCurrentId } from 'src/shared/decorators/get-current-user-id.decorator';
-import { RtGuard } from './guards/rt.guard';
-import { GetRt } from '@shared/decorators';
-import { SignUpDto } from './dto/sign-up.dto';
-import { AuthGuard } from './guards/auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password';
+import { SignUpDto } from './dto/sign-up.dto';
 import { VerifyOTPDto } from './dto/verify-otp.dto';
-import { Account } from '@prisma/client';
+import { AuthGuard } from './guards/auth.guard';
+import { RtGuard } from './guards/rt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -86,11 +85,12 @@ export class AuthController {
     return this.authService.refreshTokens(currentId, refreshToken);
   }
 
-  @Patch(':accountId/pin-code/toggle')
-  async togglePinCodeStatus(
-    @Param('accountId') accountId: string,
+  @UseGuards(AuthGuard)
+  @Patch('pin-code/inactive')
+  async inActivePinCodeStatus(
+    @GetCurrentId() currentId: string,
   ): Promise<Account> {
-    return this.authService.togglePinCodeStatus(accountId);
+    return this.authService.inActivePinCodeStatus(currentId);
   }
 
   @UseGuards(AuthGuard)
