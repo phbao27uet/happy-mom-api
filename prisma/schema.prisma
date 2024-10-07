@@ -35,6 +35,7 @@ model Account {
   friendOf     Friend[]      @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
 
   pinCode PinCode?
+  Device  Device[]
 }
 
 model PinCode {
@@ -44,6 +45,16 @@ model PinCode {
   accountId String   @unique @db.ObjectId // Đảm bảo mỗi tài khoản chỉ có một mã PIN
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Device {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  deviceName String
+  deviceType String // i.e., "iPhone", "Android", etc.
+  deviceId   String // Mã định danh duy nhất cho thiết bị (như UUID hoặc serial của thiết bị)
+  lastLogin  DateTime @default(now()) // Dấu thời gian của lần đăng nhập cuối cùng từ thiết bị này
+  accountId  String   @db.ObjectId
+  account    Account  @relation(fields: [accountId], references: [id])
 }
 
 model User {
