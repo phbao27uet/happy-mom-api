@@ -6,23 +6,20 @@ import {
   Param,
   Post,
   Put,
-  Query,
 } from '@nestjs/common';
-import { DevicesService } from './devices.service';
 import { Device } from '@prisma/client';
+import { Auth, GetCurrentId } from '@shared/decorators';
+import { DevicesService } from './devices.service';
 import { CreateDeviceDto, UpdateDeviceDto } from './dto';
-import { Auth } from '@shared/decorators';
 
-@Auth('USER', 'ADMIN')
+@Auth('USER')
 @Controller('devices')
 export class DevicesController {
   constructor(private readonly devicesService: DevicesService) {}
 
   @Get('')
-  async findAllByAccount(
-    @Query('accountId') accountId: string,
-  ): Promise<Device[]> {
-    return this.devicesService.findAllByAccount(accountId);
+  async findAllByAccount(@GetCurrentId() currentId: string): Promise<Device[]> {
+    return this.devicesService.findAllByAccount(currentId);
   }
 
   @Get(':id')
