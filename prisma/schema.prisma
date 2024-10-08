@@ -49,13 +49,14 @@ model PinCode {
 }
 
 model Device {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  deviceName String
-  deviceType String // i.e., "iPhone", "Android", etc.
-  deviceId   String // Mã định danh duy nhất cho thiết bị (như UUID hoặc serial của thiết bị)
-  lastLogin  DateTime @default(now()) // Dấu thời gian của lần đăng nhập cuối cùng từ thiết bị này
-  accountId  String   @db.ObjectId
-  account    Account  @relation(fields: [accountId], references: [id])
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  deviceName  String
+  deviceType  String // i.e., "iPhone", "Android", etc.
+  deviceId    String // Mã định danh duy nhất cho thiết bị (như UUID hoặc serial của thiết bị)
+  lastLogin   DateTime @default(now()) // Dấu thời gian của lần đăng nhập cuối cùng từ thiết bị này
+  accessToken String?
+  accountId   String   @db.ObjectId
+  account     Account  @relation(fields: [accountId], references: [id])
 }
 
 model User {

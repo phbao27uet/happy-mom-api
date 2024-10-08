@@ -5,6 +5,7 @@ const updateDeviceSchema = z.object({
   deviceName: z.string().optional(),
   deviceType: z.string().optional(),
   deviceId: z.string().optional(),
+  accessToken: z.string().optional(),
 });
 
 // Định nghĩa DTO cho UpdateDevice
