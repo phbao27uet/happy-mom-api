@@ -1,8 +1,8 @@
-import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
-import { FoodsService } from './foods.service';
-import { Auth } from '@shared/decorators';
-import { DefaultFindAllQueryDto } from '@models/base';
-import { GetListFoodDto } from './dto';
+import { DefaultFindAllQueryDto } from '@models/base'
+import { Controller, Delete, Get, Param, Query } from '@nestjs/common'
+import { Auth } from '@shared/decorators'
+import { GetListFoodDto } from './dto'
+import { FoodsService } from './foods.service'
 
 @Controller('foods')
 export class FoodsController {
@@ -11,19 +11,19 @@ export class FoodsController {
   @Auth('USER', 'ADMIN')
   @Get('')
   async findAll(@Query() queryDto: GetListFoodDto) {
-    return this.foodsService.findAll(queryDto);
+    return this.foodsService.findAll(queryDto)
   }
 
   @Auth('USER', 'ADMIN')
   @Get('food-categories')
   async findAllFoodCategories(@Query() queryDto: DefaultFindAllQueryDto) {
-    return this.foodsService.findAllFoodCategories(queryDto);
+    return this.foodsService.findAllFoodCategories(queryDto)
   }
 
   @Auth('USER', 'ADMIN')
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.foodsService.findOne(id);
+    return this.foodsService.findOne(id)
   }
 
   // @Auth('ADMIN')
@@ -47,6 +47,6 @@ export class FoodsController {
   @Auth('ADMIN')
   @Delete(':id')
   async delete(@Param('id') id: string) {
-    return this.foodsService.remove(id);
+    return this.foodsService.remove(id)
   }
 }

@@ -1,6 +1,6 @@
-import { PrismaClient, MedicineUnit } from '@prisma/client';
+import { MedicineUnit, PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 enum MedicineInstructionType {
   SAFE = 'SAFE', // An toàn
@@ -375,24 +375,24 @@ async function main() {
         },
       ],
     },
-  ];
+  ]
 
   for (const medicine of medicines) {
     await prisma.medicine.upsert({
       where: { name: medicine.name },
       create: medicine,
       update: medicine,
-    });
+    })
   }
 
-  console.log('done.');
+  console.log('done.')
 }
 
 main()
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    console.error(e)
+    process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+    await prisma.$disconnect()
+  })
