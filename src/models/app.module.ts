@@ -25,6 +25,9 @@ import { BabyTrackingModule } from './baby-tracking/baby-tracking.module';
 import { MedicinesModule } from './medicines/medicines.module';
 import { EarlyEducationsModule } from './early-educations/early-educations.module';
 import { FriendsModule } from './friends/friends.module';
+import { PinCodeModule } from './pin-code/pin-code.module';
+import { DevicesModule } from './devices/devices.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -55,6 +58,9 @@ import { FriendsModule } from './friends/friends.module';
     MedicinesModule,
     EarlyEducationsModule,
     FriendsModule,
+    PinCodeModule,
+    DevicesModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [

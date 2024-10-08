@@ -1,14 +1,23 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { Account } from '@prisma/client';
+import { GetRt } from '@shared/decorators';
+import { GetCurrentId } from 'src/shared/decorators/get-current-user-id.decorator';
 import { AuthService } from './auth.service';
 import { CredentialsDto, PushTokenDto } from './dto';
-import { GetCurrentId } from 'src/shared/decorators/get-current-user-id.decorator';
-import { RtGuard } from './guards/rt.guard';
-import { GetRt } from '@shared/decorators';
-import { SignUpDto } from './dto/sign-up.dto';
-import { AuthGuard } from './guards/auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password';
+import { SignUpDto } from './dto/sign-up.dto';
 import { VerifyOTPDto } from './dto/verify-otp.dto';
+import { AuthGuard } from './guards/auth.guard';
+import { RtGuard } from './guards/rt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -74,5 +83,19 @@ export class AuthController {
     @GetCurrentId() currentId: string,
   ) {
     return this.authService.refreshTokens(currentId, refreshToken);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('pin-code/inactive')
+  async inActivePinCodeStatus(
+    @GetCurrentId() currentId: string,
+  ): Promise<Account> {
+    return this.authService.inActivePinCodeStatus(currentId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('delete-account')
+  async deleteAccount(@GetCurrentId() currentId: string) {
+    return this.authService.deleteAccount(currentId);
   }
 }

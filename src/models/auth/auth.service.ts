@@ -17,7 +17,7 @@ import { OTPService } from '@models/otp/otp.service';
 import { SmsService } from '@models/sms/sms.service';
 import { isMail } from '@shared/utils';
 import { omit, uniq } from 'lodash';
-import { Prisma } from '@prisma/client';
+import { Account, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -289,5 +289,34 @@ export class AuthService {
     });
 
     return res;
+  }
+
+  async inActivePinCodeStatus(accountId: string): Promise<Account> {
+    const pinCodeActive = await this.prisma.account.findUnique({
+      where: { id: accountId },
+    });
+
+    return this.prisma.account.update({
+      where: { id: accountId },
+      data: {
+        isPinCode: !pinCodeActive?.isPinCode,
+      },
+    });
+  }
+
+  async deleteAccount(accountId: string): Promise<boolean> {
+    const account = await this.prisma.account.findUnique({
+      where: { id: accountId },
+    });
+
+    if (!account) {
+      throw new BadRequestException('Tài khoản không tồn tại');
+    }
+
+    await this.prisma.account.delete({
+      where: { id: accountId },
+    });
+
+    return true;
   }
 }

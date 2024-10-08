@@ -15,7 +15,7 @@ model Account {
   username     String        @unique
   password     String
   role         Role
-  pinCode      String?
+  isPinCode    Boolean?      @default(false)
   isVerified   Boolean       @default(false)
   refreshToken String?
   pushTokens   String[]      @default([])
@@ -33,6 +33,30 @@ model Account {
   // Friend feature
   friends      Friend[]      @relation("AccountAsSender") // Danh sách bạn bè mà mình gửi lời mời
   friendOf     Friend[]      @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
+
+  pinCode PinCode?
+  device  Device[]
+}
+
+model PinCode {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  pinCode   String // Mã PIN đã được hash
+  account   Account @relation(fields: [accountId], references: [id])
+  accountId String  @unique @db.ObjectId // Đảm bảo mỗi tài khoản chỉ có một mã PIN
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Device {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  deviceName  String
+  deviceType  String // i.e., "iPhone", "Android", etc.
+  deviceId    String // Mã định danh duy nhất cho thiết bị (như UUID hoặc serial của thiết bị)
+  lastLogin   DateTime @default(now()) // Dấu thời gian của lần đăng nhập cuối cùng từ thiết bị này
+  accessToken String?
+  accountId   String   @db.ObjectId
+  account     Account  @relation(fields: [accountId], references: [id])
 }
 
 model User {
@@ -50,7 +74,6 @@ model User {
   fullName    String?
   dob         DateTime?
   gender      Gender?
-  address     String?
   province    String?
   district    String?
   ward        String?
@@ -62,6 +85,20 @@ model User {
 
   childs      Child[]
   memberships Membership[]
+
+  addresses Address[]
+}
+
+model Address {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String  @db.ObjectId
+  description String
+  isDefault   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Friend {
@@ -481,6 +518,31 @@ model EarlyEducation {
   imageUrl    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Gói cước, thanh toán
+
+model Subscription {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String @unique
+  price    Int // Giá của gói đăng ký
+  duration Int // Số ngày: 7 cho dùng thử, 30 cho 1 tháng, -1 cho trọn đời
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  features Feature[]
+}
+
+model Feature {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  description    String
+  subscriptionId String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
 }
 
 enum MedicineUnit {
