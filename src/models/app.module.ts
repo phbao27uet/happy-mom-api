@@ -21,6 +21,7 @@ import { LikesModule } from './likes/likes.module'
 import { MedicinesModule } from './medicines/medicines.module'
 import { OTPModule } from './otp/otp.module'
 import { PostsModule } from './posts/posts.module'
+import { RecipesModule } from './recipes/recipes.module'
 import { SmsModule } from './sms/sms.module'
 import { UploadModule } from './upload/upload.module'
 import { UsersModule } from './users/users.module'
@@ -55,6 +56,7 @@ import { VaccinesModule } from './vaccines/vaccines.module'
     MedicinesModule,
     EarlyEducationsModule,
     FriendsModule,
+    RecipesModule,
   ],
   controllers: [AppController],
   providers: [

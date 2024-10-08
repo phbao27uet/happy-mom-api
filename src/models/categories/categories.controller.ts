@@ -1,6 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
-import { CategoriesService } from './categories.service';
-import { Auth } from '@shared/decorators';
+import { Controller, Get, Param, Query } from '@nestjs/common'
+import { Auth } from '@shared/decorators'
+import { CategoriesService } from './categories.service'
+import { GetCategoryDto } from './dto'
 
 @Controller('categories')
 export class CategoriesController {
@@ -8,13 +9,13 @@ export class CategoriesController {
 
   @Auth('ADMIN', 'USER')
   @Get()
-  async getCategories() {
-    return this.categoriesService.getCategories();
+  async getCategories(@Query() queryDto: GetCategoryDto) {
+    return this.categoriesService.getCategories(queryDto)
   }
 
   @Auth('ADMIN', 'USER')
   @Get(':categoryId/sub-categories')
-  async getSubCategories(categoryId: string) {
-    return this.categoriesService.getSubCategories(categoryId);
+  async getSubCategories(@Param('categoryId') categoryId: string) {
+    return this.categoriesService.getSubCategories(categoryId)
   }
 }
