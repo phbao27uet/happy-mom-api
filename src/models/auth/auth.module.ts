@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthController } from './auth.controller';
-import { JWT_CONSTANTS } from 'src/shared/utils/constants';
-import { PrismaModule } from 'src/shared/prisma/prisma.module';
-import { OTPModule } from '@models/otp/otp.module';
-import { SmsModule } from '@models/sms/sms.module';
+import { OTPModule } from '@models/otp/otp.module'
+import { SmsModule } from '@models/sms/sms.module'
+import { Module } from '@nestjs/common'
+import { JwtModule } from '@nestjs/jwt'
+import { PrismaModule } from 'src/shared/prisma/prisma.module'
+import { JWT_CONSTANTS } from 'src/shared/utils/constants'
+import { AuthController } from './auth.controller'
+import { AuthService } from './auth.service'
 
 @Module({
   imports: [

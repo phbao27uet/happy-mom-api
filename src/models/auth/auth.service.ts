@@ -2,22 +2,22 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as argon from 'argon2';
+} from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import * as argon from 'argon2'
 
-import { CredentialsDto } from './dto';
-import { Tokens } from './types';
-import { PrismaService } from 'src/shared/prisma/prisma.service';
-import { JWT_CONSTANTS } from 'src/shared/utils/constants';
-import { SignUpDto } from './dto/sign-up.dto';
-import { hashPassword, isPasswordValid } from '@shared/utils';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { OTPService } from '@models/otp/otp.service';
-import { SmsService } from '@models/sms/sms.service';
-import { isMail } from '@shared/utils';
-import { omit, uniq } from 'lodash';
-import { Prisma } from '@prisma/client';
+import { OTPService } from '@models/otp/otp.service'
+import { SmsService } from '@models/sms/sms.service'
+import { Prisma } from '@prisma/client'
+import { hashPassword, isPasswordValid } from '@shared/utils'
+import { isMail } from '@shared/utils'
+import { omit, uniq } from 'lodash'
+import { PrismaService } from 'src/shared/prisma/prisma.service'
+import { JWT_CONSTANTS } from 'src/shared/utils/constants'
+import { CredentialsDto } from './dto'
+import { ChangePasswordDto } from './dto/change-password.dto'
+import { SignUpDto } from './dto/sign-up.dto'
+import { Tokens } from './types'
 
 @Injectable()
 export class AuthService {
@@ -33,19 +33,19 @@ export class AuthService {
     username: true,
     role: true,
     pushTokens: true,
-  };
+  }
 
   async signup(dto: SignUpDto) {
     const accountExist = await this.prisma.account.findUnique({
       where: {
         username: dto.username,
       },
-    });
+    })
 
     if (accountExist) {
-      throw new ForbiddenException('Email hoặc Số điện thoại đã được sử dụng');
+      throw new ForbiddenException('Email hoặc Số điện thoại đã được sử dụng')
     }
-    const hash = await argon.hash(dto.password);
+    const hash = await argon.hash(dto.password)
 
     const user = await this.prisma.account.create({
       data: {
@@ -53,13 +53,13 @@ export class AuthService {
         password: hash,
         role: 'USER',
       },
-    });
+    })
 
     return {
       id: user.id,
       username: user.username,
       role: user.role,
-    };
+    }
   }
 
   async login(dto: CredentialsDto, isAdmin = false) {
@@ -74,22 +74,22 @@ export class AuthService {
         password: true,
         role: true,
       },
-    });
+    })
 
-    if (!account) throw new BadRequestException('Tài khoản không tồn tại');
-    const { password, ...accountWithoutPassword } = account;
+    if (!account) throw new BadRequestException('Tài khoản không tồn tại')
+    const { password, ...accountWithoutPassword } = account
 
-    const passwordMatches = await isPasswordValid(dto.password, password);
-    if (!passwordMatches) throw new BadRequestException('Mật khẩu không đúng');
+    const passwordMatches = await isPasswordValid(dto.password, password)
+    if (!passwordMatches) throw new BadRequestException('Mật khẩu không đúng')
 
     const tokens = await this.generateToken(
       account.id,
       account.username,
       account.role,
-    );
-    await this.updateRtHash(account.id, tokens.refreshToken);
+    )
+    await this.updateRtHash(account.id, tokens.refreshToken)
 
-    return { ...tokens, user: accountWithoutPassword };
+    return { ...tokens, user: accountWithoutPassword }
   }
 
   async changePassword(
@@ -103,19 +103,19 @@ export class AuthService {
       select: {
         password: true,
       },
-    });
+    })
 
-    if (!account) throw new BadRequestException('Tài khoản không tồn tại');
+    if (!account) throw new BadRequestException('Tài khoản không tồn tại')
 
     const passwordMatches = await isPasswordValid(
       changePasswordDto.current_password,
       account.password,
-    );
+    )
 
     if (!passwordMatches)
-      throw new BadRequestException('Mật khẩu cũ không đúng');
+      throw new BadRequestException('Mật khẩu cũ không đúng')
 
-    const hash = await hashPassword(changePasswordDto.new_password);
+    const hash = await hashPassword(changePasswordDto.new_password)
 
     await this.prisma.account.update({
       where: {
@@ -124,9 +124,9 @@ export class AuthService {
       data: {
         password: hash,
       },
-    });
+    })
 
-    return true;
+    return true
   }
 
   async forgotPassword(username: string) {
@@ -134,28 +134,28 @@ export class AuthService {
       where: {
         username,
       },
-    });
+    })
 
-    if (!account) throw new BadRequestException('Tài khoản không tồn tại');
+    if (!account) throw new BadRequestException('Tài khoản không tồn tại')
 
-    const otpRecord = await this.otpService.createOtp(account.id);
+    const otpRecord = await this.otpService.createOtp(account.id)
 
     if (!isMail(username)) {
       await this.smsService.sendSms({
         to: username,
         content: `Mã OTP của bạn là: ${otpRecord.code}`,
-      });
+      })
     }
 
-    return otpRecord;
+    return otpRecord
   }
 
   async verifyOtp(code: string) {
-    const res = await this.otpService.verifyOtp(code);
+    const res = await this.otpService.verifyOtp(code)
 
-    if (!res) throw new BadRequestException('Mã OTP không hợp lệ');
+    if (!res) throw new BadRequestException('Mã OTP không hợp lệ')
 
-    return res;
+    return res
   }
 
   async logout(accountId: string): Promise<boolean> {
@@ -169,8 +169,8 @@ export class AuthService {
       data: {
         refreshToken: null,
       },
-    });
-    return true;
+    })
+    return true
   }
 
   async me(accountId: string) {
@@ -185,9 +185,9 @@ export class AuthService {
           },
         },
       },
-    });
+    })
 
-    return omit(user, ['password', 'refreshToken', 'isVerified']);
+    return omit(user, ['password', 'refreshToken', 'isVerified'])
   }
 
   async refreshTokens(
@@ -198,13 +198,13 @@ export class AuthService {
       where: {
         id: accountId,
       },
-    });
+    })
     if (!account || !account.refreshToken)
-      throw new ForbiddenException('Access Denied');
+      throw new ForbiddenException('Access Denied')
 
-    const rtMatches = await argon.verify(account.refreshToken, rt);
+    const rtMatches = await argon.verify(account.refreshToken, rt)
 
-    console.log('rtMatches', rtMatches);
+    console.log('rtMatches', rtMatches)
 
     // if (!rtMatches) throw new ForbiddenException('Access Denied 123');
 
@@ -217,13 +217,13 @@ export class AuthService {
         secret: JWT_CONSTANTS.ACCESS_TOKEN_SECRET,
         expiresIn: JWT_CONSTANTS.ACCESS_TOKEN_EXPIRES_IN,
       },
-    );
+    )
 
-    return { accessToken: newAccessToken };
+    return { accessToken: newAccessToken }
   }
 
   async updateRtHash(accountId: string, rt: string): Promise<void> {
-    const hash = await argon.hash(rt);
+    const hash = await argon.hash(rt)
     await this.prisma.account.update({
       where: {
         id: accountId,
@@ -231,7 +231,7 @@ export class AuthService {
       data: {
         refreshToken: hash,
       },
-    });
+    })
   }
 
   async generateToken(accountId: string, username: string, role = 'USER') {
@@ -258,12 +258,12 @@ export class AuthService {
           expiresIn: JWT_CONSTANTS.REFRESH_TOKEN_EXPIRES_IN,
         },
       ),
-    ]);
+    ])
 
     return {
       accessToken,
       refreshToken,
-    };
+    }
   }
 
   async updatePushToken(accountId: string, pushToken: string) {
@@ -274,9 +274,9 @@ export class AuthService {
       select: {
         pushTokens: true,
       },
-    });
+    })
 
-    if (!account) throw new BadRequestException('Tài khoản không tồn tại');
+    if (!account) throw new BadRequestException('Tài khoản không tồn tại')
 
     const res = await this.prisma.account.update({
       where: {
@@ -286,8 +286,8 @@ export class AuthService {
         pushTokens: uniq([...account.pushTokens, pushToken]),
       },
       select: this._select,
-    });
+    })
 
-    return res;
+    return res
   }
 }

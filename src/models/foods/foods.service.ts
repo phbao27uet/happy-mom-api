@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/shared/prisma/prisma.service';
-import { DefaultFindAllQueryDto } from '@models/base';
-import { GetListFoodDto } from './dto';
+import { DefaultFindAllQueryDto } from '@models/base'
+import { Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
+import { PrismaService } from 'src/shared/prisma/prisma.service'
+import { GetListFoodDto } from './dto'
 
 @Injectable()
 export class FoodsService {
@@ -14,7 +14,7 @@ export class FoodsService {
       page = 1,
       foodCategoryId,
       searchOne,
-    } = defaultFindAllQuery;
+    } = defaultFindAllQuery
 
     const where: Prisma.FoodWhereInput = {
       foodCategoryId,
@@ -23,7 +23,7 @@ export class FoodsService {
         contains: searchOne,
         mode: 'insensitive',
       },
-    };
+    }
 
     const [total, data] = await Promise.all([
       this.prisma.food.count({
@@ -41,7 +41,7 @@ export class FoodsService {
         skip: page && perPage ? (page - 1) * perPage : undefined,
         take: page && perPage ? perPage : undefined,
       }),
-    ]);
+    ])
 
     return {
       data: data,
@@ -51,18 +51,18 @@ export class FoodsService {
         total: total ?? 0,
         totalPages: Math.ceil((total ?? 0) / perPage),
       },
-    };
+    }
   }
 
   async findAllFoodCategories(defaultFindAllQuery: DefaultFindAllQueryDto) {
-    const { perPage = 20, page = 1, searchOne } = defaultFindAllQuery;
+    const { perPage = 20, page = 1, searchOne } = defaultFindAllQuery
 
     const where: Prisma.FoodCategoryWhereInput = {
       name: {
         contains: searchOne,
         mode: 'insensitive',
       },
-    };
+    }
 
     const [total, data] = await Promise.all([
       this.prisma.foodCategory.count({
@@ -76,7 +76,7 @@ export class FoodsService {
         skip: page && perPage ? (page - 1) * perPage : undefined,
         take: page && perPage ? perPage : undefined,
       }),
-    ]);
+    ])
 
     return {
       data: data,
@@ -86,7 +86,7 @@ export class FoodsService {
         total: total ?? 0,
         totalPages: Math.ceil((total ?? 0) / perPage),
       },
-    };
+    }
   }
 
   async findOne(id: string) {
@@ -98,7 +98,7 @@ export class FoodsService {
         foodCategory: true,
         guidelines: true,
       },
-    });
+    })
   }
 
   // async create(currentId: string, createDiaryDto: CreateDiaryDto) {
@@ -119,7 +119,7 @@ export class FoodsService {
       where: {
         id,
       },
-    });
+    })
   }
 
   // async update(id: string, updateDiaryDto: UpdateDiaryDto) {
