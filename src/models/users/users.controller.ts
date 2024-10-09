@@ -1,7 +1,7 @@
-import { Body, Controller, Patch } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { Auth, GetCurrentId } from '@shared/decorators';
-import { UpdateUserDto } from './dto';
+import { Body, Controller, Get, Patch, Query } from '@nestjs/common'
+import { Auth, GetCurrentId } from '@shared/decorators'
+import { GetNamingForChildDto, UpdateUserDto } from './dto'
+import { UsersService } from './users.service'
 
 @Controller('users')
 export class UsersController {
@@ -13,6 +13,12 @@ export class UsersController {
     @GetCurrentId() currentId: string,
     @Body() dto: UpdateUserDto,
   ) {
-    return this.usersService.updateProfile(currentId, dto);
+    return this.usersService.updateProfile(currentId, dto)
+  }
+
+  @Auth('USER')
+  @Get('naming-for-child')
+  async getNamingForChild(@Query() dto: GetNamingForChildDto) {
+    return this.usersService.getNamingForChild(dto)
   }
 }
