@@ -409,12 +409,13 @@ model Appointment {
 
 // Chỉ số cho bé
 model BabyMonitoring {
-  id                String @id @default(auto()) @map("_id") @db.ObjectId
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
   weight            Float?
   height            Float?
   headCircumference Float?
-  childId           String @unique @db.ObjectId
-  child             Child  @relation("ChildBabyMonitoring", fields: [childId], references: [id])
+  updateDate        DateTime?
+  childId           String    @unique @db.ObjectId
+  child             Child     @relation("ChildBabyMonitoring", fields: [childId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
