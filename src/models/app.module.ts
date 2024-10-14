@@ -14,6 +14,7 @@ import { CategoriesModule } from './categories/categories.module'
 import { CommentsModule } from './comments/comments.module'
 import configurations from './configurations'
 import { EarlyEducationsModule } from './early-educations/early-educations.module'
+import { EasyModule } from './easy/easy.module'
 import { FoodsModule } from './foods/foods.module'
 import { FriendsModule } from './friends/friends.module'
 import { GroupsModule } from './groups/groups.module'
@@ -57,6 +58,7 @@ import { VaccinesModule } from './vaccines/vaccines.module'
     EarlyEducationsModule,
     FriendsModule,
     RecipesModule,
+    EasyModule,
   ],
   controllers: [AppController],
   providers: [
