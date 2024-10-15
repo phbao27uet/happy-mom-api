@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
+import { differenceInMinutes } from 'date-fns'
 import { PrismaService } from 'src/shared/prisma/prisma.service'
 import { CreateEasyDto, UpdateGroupDto } from '../dto'
 
@@ -20,6 +22,13 @@ export class EasyService {
             _count: 'desc',
           },
         },
+        include: {
+          _count: {
+            select: {
+              easyActiveAccounts: true,
+            },
+          },
+        },
       }),
       this.prisma.easy.findMany({
         where: {
@@ -35,6 +44,13 @@ export class EasyService {
             _count: 'desc',
           },
         },
+        include: {
+          _count: {
+            select: {
+              easyActiveAccounts: true,
+            },
+          },
+        },
         take: 20,
       }),
     ])
@@ -45,47 +61,64 @@ export class EasyService {
     }
   }
 
-  async create(createDto: CreateEasyDto) {
-    return 'Create E.A.S.Y'
-  }
+  async create(accountId: string, createDto: CreateEasyDto) {
+    const { easyActivityGroups, ...easy } = createDto
 
-  async findOne(id: string) {
-    const res = await this.prisma.easy.findUnique({
-      where: {
-        id: id,
+    const easyActivityGroupsToCreate: Prisma.EasyActivityGroupCreateWithoutEasyInput[] =
+      easyActivityGroups?.map((group) => ({
+        name: group.name,
+        easyActivities: {
+          create: group.easyActivities.map((activity) => ({
+            startTime: activity.startTime,
+            endTime: activity.endTime,
+            note: activity.note,
+            type: activity.type,
+            duration: activity.endTime
+              ? differenceInMinutes(activity.endTime, activity.startTime)
+              : null,
+          })),
+        },
+      })) || []
+
+    const res = await this.prisma.easy.create({
+      data: {
+        ...easy,
+        creatorId: accountId,
+        easyActivityGroups: {
+          create: easyActivityGroupsToCreate,
+        },
+      },
+      include: {
+        easyActivityGroups: {
+          include: {
+            easyActivities: true,
+          },
+        },
       },
     })
-
-    if (!res) {
-      throw new NotFoundException('EASY không tồn tại')
-    }
 
     return res
   }
 
-  async update(id: string, updateDto: UpdateGroupDto) {
-    const res = await this.prisma.easy.findUnique({
+  async findOne(id: string) {
+    const res = await this.prisma.easy.findUniqueOrThrow({
       where: {
         id: id,
       },
-    })
-
-    if (!res) {
-      throw new NotFoundException('EASY không tồn tại')
-    }
-
-    return this.prisma.easy.update({
-      where: {
-        id: id,
-      },
-      data: {
-        ...updateDto,
+      include: {
+        easyActivityGroups: {
+          include: {
+            easyActivities: true,
+          },
+        },
       },
     })
+
+    return res
   }
 
-  async remove(accountId: string, id: string) {
-    const res = await this.prisma.easy.findUnique({
+  async update(accountId: string, id: string, updateDto: UpdateGroupDto) {
+    await this.prisma.easy.findUniqueOrThrow({
       where: {
         id: id,
         type: {
@@ -95,9 +128,80 @@ export class EasyService {
       },
     })
 
-    if (!res) {
-      throw new NotFoundException('Lịch E.A.S.Y không tồn tại')
-    }
+    const { easyActivityGroups, ...easy } = updateDto
+
+    const res = await this.prisma.easy.update({
+      where: {
+        id: id,
+        type: {
+          not: 'DEFAULT',
+        },
+        creatorId: accountId, // Must be the creator
+      },
+      data: {
+        ...easy,
+        easyActivityGroups: {
+          deleteMany: {},
+          create:
+            easyActivityGroups?.map((group) => ({
+              name: group.name,
+              easyActivities: {
+                create: group.easyActivities.map((activity) => ({
+                  startTime: activity.startTime,
+                  endTime: activity.endTime,
+                  note: activity.note,
+                  type: activity.type,
+                  duration: activity.endTime
+                    ? differenceInMinutes(activity.endTime, activity.startTime)
+                    : null,
+                })),
+              },
+            })) || [],
+        },
+      },
+      include: {
+        easyActivityGroups: {
+          include: {
+            easyActivities: true,
+          },
+        },
+      },
+    })
+
+    return res
+  }
+
+  async select(accountId: string, id: string) {
+    await this.prisma.easy.findUniqueOrThrow({
+      where: {
+        id: id,
+      },
+    })
+
+    return this.prisma.easyActiveAccount.upsert({
+      where: {
+        accountId,
+      },
+      update: {
+        easyId: id,
+      },
+      create: {
+        accountId,
+        easyId: id,
+      },
+    })
+  }
+
+  async remove(accountId: string, id: string) {
+    await this.prisma.easy.findUniqueOrThrow({
+      where: {
+        id: id,
+        type: {
+          not: 'DEFAULT',
+        },
+        creatorId: accountId, // Must be the creator
+      },
+    })
 
     return this.prisma.easy.delete({
       where: {
