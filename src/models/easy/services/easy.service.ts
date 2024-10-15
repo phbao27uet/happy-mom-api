@@ -141,7 +141,9 @@ export class EasyService {
       data: {
         ...easy,
         easyActivityGroups: {
-          deleteMany: {},
+          deleteMany: {
+            easyId: id,
+          },
           create:
             easyActivityGroups?.map((group) => ({
               name: group.name,
