@@ -1,5 +1,9 @@
-import { dateSchema, textSchema, textSchemaMax1024 } from '@shared/schemas'
-import { numberSchema } from '@shared/schemas/number'
+import {
+  dateSchema,
+  numberSchema,
+  textSchema,
+  textSchemaInfinite,
+} from '@shared/schemas'
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'nestjs-zod/z'
 
@@ -11,24 +15,31 @@ const easyActivityTypeSchema = z.enum([
   'OTHER',
 ])
 
-export const easyActivitySchema = z.object({
-  type: easyActivityTypeSchema,
-  startTime: dateSchema,
-  endTime: dateSchema,
-  note: textSchemaMax1024,
-})
+export const easyActivitySchema = z
+  .object({
+    type: easyActivityTypeSchema.array(),
+    startTime: dateSchema,
+    endTime: dateSchema.optional(),
+    note: textSchemaInfinite,
+  })
+  .strict()
 
-export const easyActivityGroupSchema = z.object({
-  easyActivities: easyActivitySchema.array(),
-})
+export const easyActivityGroupSchema = z
+  .object({
+    name: textSchema,
+    easyActivities: easyActivitySchema.array(),
+  })
+  .strict()
 
-export const createEasySchema = z.object({
-  name: textSchema,
-  startWeek: numberSchema,
-  endWeek: numberSchema,
-  note: textSchemaMax1024,
-  type: z.enum(['PUBLIC', 'PRIVATE']),
-  activityGroups: easyActivityGroupSchema.array(),
-})
+export const createEasySchema = z
+  .object({
+    name: textSchema,
+    startWeek: numberSchema.optional(),
+    endWeek: numberSchema.optional(),
+    note: textSchemaInfinite.optional(),
+    type: z.enum(['PUBLIC', 'PRIVATE']),
+    easyActivityGroups: easyActivityGroupSchema.array().optional(),
+  })
+  .strict()
 
 export class CreateEasyDto extends createZodDto(createEasySchema) {}

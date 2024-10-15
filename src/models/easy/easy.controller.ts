@@ -29,14 +29,27 @@ export class EasyController {
 
   @Auth('USER')
   @Post('')
-  async create(@Body() createDto: CreateEasyDto) {
-    return this.easyService.create(createDto)
+  async create(
+    @Body() createDto: CreateEasyDto,
+    @GetCurrentId() currentId: string,
+  ) {
+    return this.easyService.create(currentId, createDto)
+  }
+
+  @Auth('USER')
+  @Post(':id/select')
+  async select(@GetCurrentId() currentId: string, @Param('id') id: string) {
+    return this.easyService.select(currentId, id)
   }
 
   @Auth('USER')
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateDto: UpdateGroupDto) {
-    return this.easyService.update(id, updateDto)
+  async update(
+    @GetCurrentId() currentId: string,
+    @Param('id') id: string,
+    @Body() updateDto: UpdateGroupDto,
+  ) {
+    return this.easyService.update(currentId, id, updateDto)
   }
 
   @Auth('USER')
