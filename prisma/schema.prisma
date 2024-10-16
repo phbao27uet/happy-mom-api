@@ -98,13 +98,14 @@ model Child {
   gender    Gender      @default(OTHER)
   userId    String      @db.ObjectId
   user      User        @relation(fields: [userId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
   babyDiaries       BabyDiary[]
   vaccineInjections VaccineInjection[]
   baseEntries       BabyTracking[]
   toothGrowths      ToothGrowth[]
+  emotionLogs       EmotionLog[]
 }
 
 model Group {
@@ -593,14 +594,34 @@ model ToothGrowth {
   @@unique([toothId, childId])
 }
 
+model EmotionLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  date      DateTime @default(now())
+  emotion   Emotion
+  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  childId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, childId])
+}
+
+enum Emotion {
+  VERY_GOOD // Rất ngoan
+  GOOD // Ngoan
+  NORMAL // Bình thường
+  FUSSY // Nhõng nhẽo
+  VERY_FUSSY // Rất nhõng nhẽo
+}
+
 enum ToothStatus {
-  NOT_GROWN
-  GROWN
+  NOT_GROWN // Chưa mọc
+  GROWN // Đã mọc
 }
 
 enum JawPosition {
-  UPPER
-  LOWER
+  UPPER // Hàm trên
+  LOWER // Hàm dưới
 }
 
 enum EasyType {
