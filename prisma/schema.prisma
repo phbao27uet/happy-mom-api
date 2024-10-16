@@ -104,6 +104,7 @@ model Child {
   babyDiaries       BabyDiary[]
   vaccineInjections VaccineInjection[]
   baseEntries       BabyTracking[]
+  toothGrowths      ToothGrowth[]
 }
 
 model Group {
@@ -503,6 +504,7 @@ model EarlyEducation {
   updatedAt   DateTime @updatedAt
 }
 
+// ======== Easy ========
 model Easy {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
@@ -561,6 +563,44 @@ model EasyActiveAccount {
   easy      Easy     @relation(fields: [easyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ======== Mọc răng ========
+model ToothMaster {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  toothNumber  Int
+  name         String        @unique
+  growthTime   String
+  jawPosition  JawPosition
+  toothGrowths ToothGrowth[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model ToothGrowth {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  growthDate DateTime
+  status     ToothStatus @default(NOT_GROWN)
+  notes      String?
+  images     String[]    @default([])
+  tooth      ToothMaster @relation(fields: [toothId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  toothId    String      @db.ObjectId
+  child      Child       @relation(fields: [childId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  childId    String      @db.ObjectId
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([toothId, childId])
+}
+
+enum ToothStatus {
+  NOT_GROWN
+  GROWN
+}
+
+enum JawPosition {
+  UPPER
+  LOWER
 }
 
 enum EasyType {
