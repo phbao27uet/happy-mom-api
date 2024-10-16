@@ -15,6 +15,7 @@ import { CommentsModule } from './comments/comments.module'
 import configurations from './configurations'
 import { EarlyEducationsModule } from './early-educations/early-educations.module'
 import { EasyModule } from './easy/easy.module'
+import { EmotionModule } from './emotion/emotion.module'
 import { FoodsModule } from './foods/foods.module'
 import { FriendsModule } from './friends/friends.module'
 import { GroupsModule } from './groups/groups.module'
@@ -61,6 +62,7 @@ import { VaccinesModule } from './vaccines/vaccines.module'
     RecipesModule,
     EasyModule,
     TeethModule,
+    EmotionModule,
   ],
   controllers: [AppController],
   providers: [
