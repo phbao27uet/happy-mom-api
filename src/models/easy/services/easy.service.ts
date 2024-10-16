@@ -140,26 +140,32 @@ export class EasyService {
       },
       data: {
         ...easy,
-        easyActivityGroups: {
-          deleteMany: {
-            easyId: id,
+        // TODO: Nếu có thay đổi liên quan đến easyActivityGroups thì xoá tất cả các group cũ và tạo mới
+        ...(easyActivityGroups?.length && {
+          easyActivityGroups: {
+            deleteMany: {
+              easyId: id,
+            },
+            create:
+              easyActivityGroups?.map((group) => ({
+                name: group.name,
+                easyActivities: {
+                  create: group.easyActivities.map((activity) => ({
+                    startTime: activity.startTime,
+                    endTime: activity.endTime,
+                    note: activity.note,
+                    type: activity.type,
+                    duration: activity.endTime
+                      ? differenceInMinutes(
+                          activity.endTime,
+                          activity.startTime,
+                        )
+                      : null,
+                  })),
+                },
+              })) || [],
           },
-          create:
-            easyActivityGroups?.map((group) => ({
-              name: group.name,
-              easyActivities: {
-                create: group.easyActivities.map((activity) => ({
-                  startTime: activity.startTime,
-                  endTime: activity.endTime,
-                  note: activity.note,
-                  type: activity.type,
-                  duration: activity.endTime
-                    ? differenceInMinutes(activity.endTime, activity.startTime)
-                    : null,
-                })),
-              },
-            })) || [],
-        },
+        }),
       },
       include: {
         easyActivityGroups: {
