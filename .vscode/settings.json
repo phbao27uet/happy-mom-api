@@ -20,5 +20,5 @@
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
-  "conventionalCommits.scopes": ["(admin)"]
+  "conventionalCommits.scopes": ["admin", "user"]
 }
