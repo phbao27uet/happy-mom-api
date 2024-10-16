@@ -19,5 +19,6 @@
   "cSpell.words": ["Swipeable", "Tabbar"],
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
-  }
+  },
+  "conventionalCommits.scopes": ["(admin)"]
 }
