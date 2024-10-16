@@ -152,10 +152,10 @@ model Like {
   accountId String  @db.ObjectId
   account   Account @relation(fields: [accountId], references: [id])
 
-  post   Post?   @relation(fields: [postId], references: [id])
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   postId String? @db.ObjectId
 
-  article   Article? @relation(fields: [articleId], references: [id])
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   articleId String?  @db.ObjectId
 
   createdAt DateTime @default(now())
@@ -167,7 +167,7 @@ model Comment {
   content      String?
   images       String[]      @default([])
   postId       String?       @db.ObjectId
-  post         Post?         @relation(fields: [postId], references: [id])
+  post         Post?         @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   authorId     String        @db.ObjectId
   author       Account       @relation(fields: [authorId], references: [id])
   parentId     String?       @db.ObjectId
@@ -188,7 +188,7 @@ model LikeComment {
   accountId String  @db.ObjectId
   account   Account @relation(fields: [accountId], references: [id])
   commentId String  @db.ObjectId
-  comment   Comment @relation(fields: [commentId], references: [id])
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -245,7 +245,7 @@ model Article {
   images      String[] @default([])
 
   subCategoryId String      @db.ObjectId
-  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   likes     Like[]
   comments  Comment[]
