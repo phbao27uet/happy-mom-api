@@ -24,6 +24,7 @@ import { OTPModule } from './otp/otp.module'
 import { PostsModule } from './posts/posts.module'
 import { RecipesModule } from './recipes/recipes.module'
 import { SmsModule } from './sms/sms.module'
+import { TeethModule } from './teeth/teeth.module'
 import { UploadModule } from './upload/upload.module'
 import { UsersModule } from './users/users.module'
 import { VaccinesModule } from './vaccines/vaccines.module'
@@ -59,6 +60,7 @@ import { VaccinesModule } from './vaccines/vaccines.module'
     FriendsModule,
     RecipesModule,
     EasyModule,
+    TeethModule,
   ],
   controllers: [AppController],
   providers: [
