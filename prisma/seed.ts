@@ -1,7 +1,12 @@
-import { GuidelineType, PrismaClient } from '@prisma/client';
-import { hashPassword } from 'src/shared/utils/hash';
+import { GuidelineType, PrismaClient } from '@prisma/client'
+import { hashPassword } from 'src/shared/utils/hash'
+import easySeed from './easy.seed'
+import medicineSeed from './medicine.seed'
+import recipeSeed from './recipe.seed'
+import vaccineSeed from './story.seed'
+import toothSeed from './tooth.seed'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 const generateVaccine = async () => {
   const vaccineHBV = await prisma.vaccine.upsert({
@@ -55,7 +60,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineLao = await prisma.vaccine.upsert({
     where: {
@@ -86,7 +91,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineRota = await prisma.vaccine.upsert({
     where: {
@@ -128,7 +133,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccine5in1Or6in1 = await prisma.vaccine.upsert({
     where: {
@@ -176,7 +181,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccinePheCau = await prisma.vaccine.upsert({
     where: {
@@ -224,7 +229,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineCumMua = await prisma.vaccine.upsert({
     where: {
@@ -260,7 +265,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineViemMangNaoBC = await prisma.vaccine.upsert({
     where: {
@@ -296,7 +301,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineSoiQuaiBiRubela = await prisma.vaccine.upsert({
     where: {
@@ -332,7 +337,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineViemNaoNB = await prisma.vaccine.upsert({
     where: {
@@ -374,7 +379,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineThuyDau = await prisma.vaccine.upsert({
     where: {
@@ -410,7 +415,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineViemGanA = await prisma.vaccine.upsert({
     where: {
@@ -446,7 +451,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineViemMangNaoAC = await prisma.vaccine.upsert({
     where: {
@@ -476,7 +481,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineThuongHan = await prisma.vaccine.upsert({
     where: {
@@ -506,7 +511,7 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
+  })
 
   const vaccineHPV = await prisma.vaccine.upsert({
     where: {
@@ -536,11 +541,11 @@ const generateVaccine = async () => {
       },
     },
     update: {},
-  });
-};
+  })
+}
 
 async function main() {
-  const password = await hashPassword('123123a');
+  const password = await hashPassword('123123a')
 
   await prisma.account.upsert({
     where: {
@@ -552,7 +557,7 @@ async function main() {
       password,
       role: 'ADMIN',
     },
-  });
+  })
 
   await prisma.account.upsert({
     where: {
@@ -564,7 +569,7 @@ async function main() {
       password,
       role: 'USER',
     },
-  });
+  })
 
   await prisma.group.upsert({
     where: {
@@ -576,7 +581,7 @@ async function main() {
       description: 'Description of Group 1',
       background: 'https://source.unsplash.com/random',
     },
-  });
+  })
 
   await prisma.group.upsert({
     where: {
@@ -588,7 +593,7 @@ async function main() {
       description: 'Description of Group 2',
       background: 'https://source.unsplash.com/random',
     },
-  });
+  })
 
   await prisma.group.upsert({
     where: {
@@ -600,7 +605,7 @@ async function main() {
       description: 'Description of Group 3',
       background: 'https://source.unsplash.com/random',
     },
-  });
+  })
 
   await prisma.category.upsert({
     where: {
@@ -624,7 +629,7 @@ async function main() {
       },
     },
     update: {},
-  });
+  })
 
   const category_1 = await prisma.category.upsert({
     where: {
@@ -651,7 +656,7 @@ async function main() {
     include: {
       subCategories: true,
     },
-  });
+  })
 
   const category_2 = await prisma.category.upsert({
     where: {
@@ -682,7 +687,7 @@ async function main() {
     include: {
       subCategories: true,
     },
-  });
+  })
 
   await prisma.article.upsert({
     where: {
@@ -703,7 +708,7 @@ async function main() {
         'https://pub-402f41e20b984c66a583408bb7b47aeb.r2.dev/1706770133_avatar_1706770133%201.png',
     },
     update: {},
-  });
+  })
 
   await prisma.article.upsert({
     where: {
@@ -724,7 +729,7 @@ async function main() {
         'https://pub-402f41e20b984c66a583408bb7b47aeb.r2.dev/1706770133_avatar_1706770133%201.png',
     },
     update: {},
-  });
+  })
 
   await prisma.article.upsert({
     where: {
@@ -745,7 +750,7 @@ async function main() {
         'https://pub-402f41e20b984c66a583408bb7b47aeb.r2.dev/1706770133_avatar_1706770133%201.png',
     },
     update: {},
-  });
+  })
 
   await prisma.article.upsert({
     where: {
@@ -766,7 +771,7 @@ async function main() {
         'https://pub-402f41e20b984c66a583408bb7b47aeb.r2.dev/1706770133_avatar_1706770133%201.png',
     },
     update: {},
-  });
+  })
 
   const foodCategories = await Promise.all([
     prisma.foodCategory.upsert({
@@ -814,7 +819,7 @@ async function main() {
           'https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2022/11/9/veggies-1667967142376-1667967142662941776652.jpg',
       },
     }),
-  ]);
+  ])
 
   // Seed Foods with Guidelines
   await prisma.food.upsert({
@@ -841,7 +846,7 @@ async function main() {
         ],
       },
     },
-  });
+  })
 
   await prisma.food.upsert({
     where: { name: 'Cà rốt' },
@@ -867,19 +872,24 @@ async function main() {
         ],
       },
     },
-  });
+  })
 
-  await generateVaccine();
+  await generateVaccine()
+  await easySeed()
+  await medicineSeed()
+  await recipeSeed()
+  await toothSeed()
+  await vaccineSeed()
 
-  console.log('seed success');
+  console.log('seed success')
 }
 
 main()
   .then(async () => {
-    await prisma.$disconnect();
+    await prisma.$disconnect()
   })
   .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+    console.error(e)
+    await prisma.$disconnect()
+    process.exit(1)
+  })

@@ -144,3 +144,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
+
+export default main
