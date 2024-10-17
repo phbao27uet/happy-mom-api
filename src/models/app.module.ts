@@ -13,6 +13,7 @@ import { BabyTrackingModule } from './baby-tracking/baby-tracking.module'
 import { CategoriesModule } from './categories/categories.module'
 import { CommentsModule } from './comments/comments.module'
 import configurations from './configurations'
+import { DealsModule } from './deals/deals.module'
 import { EarlyEducationsModule } from './early-educations/early-educations.module'
 import { EasyModule } from './easy/easy.module'
 import { EmotionModule } from './emotion/emotion.module'
@@ -65,6 +66,7 @@ import { VaccinesModule } from './vaccines/vaccines.module'
     TeethModule,
     EmotionModule,
     StoriesModule,
+    DealsModule,
   ],
   controllers: [AppController],
   providers: [
