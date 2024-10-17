@@ -4,7 +4,7 @@ import { z } from 'nestjs-zod/z'
 
 const getCategorySchema = DefaultFindAllQuerySchema.merge(
   z.object({
-    type: z.enum(['ARTICLE', 'RECIPE']).default('ARTICLE'),
+    type: z.enum(['ARTICLE', 'RECIPE', 'STORY']).default('ARTICLE'),
   }),
 )
 

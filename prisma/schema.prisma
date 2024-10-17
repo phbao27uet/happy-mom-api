@@ -35,6 +35,7 @@ model Account {
   friendOf          Friend[]           @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
   easies            Easy[]
   easyActiveAccount EasyActiveAccount?
+  savedStories      SavedStory[]
 }
 
 model User {
@@ -200,11 +201,13 @@ model Category {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   name          String        @unique
   description   String?
+  image         String?
   type          CategoryType  @default(ARTICLE)
   subCategories SubCategory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  stories   Story[]
 }
 
 model SubCategory {
@@ -594,6 +597,7 @@ model ToothGrowth {
   @@unique([toothId, childId])
 }
 
+// ======== Cảm xúc của bé ========
 model EmotionLog {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   date      DateTime @default(now())
@@ -604,6 +608,32 @@ model EmotionLog {
   updatedAt DateTime @updatedAt
 
   @@unique([date, childId])
+}
+
+// ======== Đọc truyện cho bé ========
+model Story {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String   @unique
+  content    String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String   @db.ObjectId
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  savedStories SavedStory[]
+}
+
+model SavedStory {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  accountId String  @db.ObjectId
+  story     Story   @relation(fields: [storyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  storyId   String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([accountId, storyId])
 }
 
 enum Emotion {
@@ -751,12 +781,13 @@ enum VaccineInjectionStatus {
 }
 
 enum FriendStatus {
-  PENDING
-  ACCEPTED
-  DECLINED
+  PENDING // Đang chờ xác nhận
+  ACCEPTED // Đã chấp nhận
+  DECLINED // Đã từ chối
 }
 
 enum CategoryType {
   RECIPE // Công thức nấu ăn
   ARTICLE // Cẩm nang
+  STORY // Truyện
 }
