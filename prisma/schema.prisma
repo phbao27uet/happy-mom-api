@@ -11,28 +11,32 @@ datasource db {
 }
 
 model Account {
-  id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  username     String        @unique
-  password     String
-  role         Role
-  pinCode      String?
-  isVerified   Boolean       @default(false)
-  refreshToken String?
-  pushTokens   String[]      @default([])
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  user         User?
-  otps         OTP[]
-  posts        Post[]
-  likes        Like[]
-  comments     Comment[]
-  likeComments LikeComment[]
-  participants Participant[]
-  babyDiaries  BabyDiary[]
-  alarms       Alarm[]
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
+  username          String             @unique
+  password          String
+  role              Role
+  pinCode           String?
+  isVerified        Boolean            @default(false)
+  refreshToken      String?
+  pushTokens        String[]           @default([])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User?
+  otps              OTP[]
+  posts             Post[]
+  likes             Like[]
+  comments          Comment[]
+  likeComments      LikeComment[]
+  participants      Participant[]
+  babyDiaries       BabyDiary[]
+  alarms            Alarm[]
   // Friend feature
-  friends      Friend[]      @relation("AccountAsSender") // Danh sách bạn bè mà mình gửi lời mời
-  friendOf     Friend[]      @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
+  friends           Friend[]           @relation("AccountAsSender") // Danh sách bạn bè mà mình gửi lời mời
+  friendOf          Friend[]           @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
+  easies            Easy[]
+  easyActiveAccount EasyActiveAccount?
+  savedStories      SavedStory[]
+  userDealUsages    UserDealUsage[]
 }
 
 model User {
@@ -96,12 +100,14 @@ model Child {
   gender    Gender      @default(OTHER)
   userId    String      @db.ObjectId
   user      User        @relation(fields: [userId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
   babyDiaries       BabyDiary[]
   vaccineInjections VaccineInjection[]
   baseEntries       BabyTracking[]
+  toothGrowths      ToothGrowth[]
+  emotionLogs       EmotionLog[]
 }
 
 model Group {
@@ -150,10 +156,10 @@ model Like {
   accountId String  @db.ObjectId
   account   Account @relation(fields: [accountId], references: [id])
 
-  post   Post?   @relation(fields: [postId], references: [id])
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   postId String? @db.ObjectId
 
-  article   Article? @relation(fields: [articleId], references: [id])
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   articleId String?  @db.ObjectId
 
   createdAt DateTime @default(now())
@@ -165,7 +171,7 @@ model Comment {
   content      String?
   images       String[]      @default([])
   postId       String?       @db.ObjectId
-  post         Post?         @relation(fields: [postId], references: [id])
+  post         Post?         @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   authorId     String        @db.ObjectId
   author       Account       @relation(fields: [authorId], references: [id])
   parentId     String?       @db.ObjectId
@@ -186,7 +192,7 @@ model LikeComment {
   accountId String  @db.ObjectId
   account   Account @relation(fields: [accountId], references: [id])
   commentId String  @db.ObjectId
-  comment   Comment @relation(fields: [commentId], references: [id])
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -196,11 +202,13 @@ model Category {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   name          String        @unique
   description   String?
+  image         String?
   type          CategoryType  @default(ARTICLE)
   subCategories SubCategory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  stories   Story[]
 }
 
 model SubCategory {
@@ -243,7 +251,7 @@ model Article {
   images      String[] @default([])
 
   subCategoryId String      @db.ObjectId
-  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   likes     Like[]
   comments  Comment[]
@@ -501,6 +509,200 @@ model EarlyEducation {
   updatedAt   DateTime @updatedAt
 }
 
+// ======== Easy ========
+model Easy {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  startWeek Int      @default(0)
+  endWeek   Int?
+  note      String?
+  type      EasyType @default(PRIVATE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creatorId          String              @db.ObjectId
+  creator            Account             @relation(fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  easyActivityGroups EasyActivityGroup[]
+  easyActiveAccounts EasyActiveAccount[]
+
+  @@unique([creatorId, name])
+  @@index([creatorId])
+  @@index([type])
+  @@index([startWeek, endWeek])
+}
+
+model EasyActivityGroup {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  easy           Easy           @relation(fields: [easyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  easyId         String         @db.ObjectId
+  easyActivities EasyActivity[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([easyId])
+}
+
+model EasyActivity {
+  id              String             @id @default(auto()) @map("_id") @db.ObjectId
+  type            EasyActivityType[]
+  startTime       DateTime
+  endTime         DateTime?
+  duration        Float? // in minutes
+  note            String?
+  activityGroup   EasyActivityGroup  @relation(fields: [activityGroupId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  activityGroupId String             @db.ObjectId
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([activityGroupId])
+  @@index([type])
+  @@index([startTime, endTime])
+}
+
+model EasyActiveAccount {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  accountId String   @unique @db.ObjectId
+  easyId    String   @db.ObjectId
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  easy      Easy     @relation(fields: [easyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ======== Mọc răng ========
+model ToothMaster {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  toothNumber  Int
+  name         String        @unique
+  growthTime   String
+  jawPosition  JawPosition
+  toothGrowths ToothGrowth[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model ToothGrowth {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  growthDate DateTime
+  status     ToothStatus @default(NOT_GROWN)
+  notes      String?
+  images     String[]    @default([])
+  tooth      ToothMaster @relation(fields: [toothId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  toothId    String      @db.ObjectId
+  child      Child       @relation(fields: [childId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  childId    String      @db.ObjectId
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([toothId, childId])
+}
+
+// ======== Cảm xúc của bé ========
+model EmotionLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  date      DateTime @default(now())
+  emotion   Emotion
+  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  childId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, childId])
+}
+
+// ======== Đọc truyện cho bé ========
+model Story {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String   @unique
+  content    String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String   @db.ObjectId
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  savedStories SavedStory[]
+}
+
+model SavedStory {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  accountId String  @db.ObjectId
+  story     Story   @relation(fields: [storyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  storyId   String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([accountId, storyId])
+}
+
+model Deal {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  description    String
+  imageUrl       String
+  expiredAt      DateTime
+  type           DealType
+  // version        Int             @default(0) // Thêm trường version cho optimistic locking
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  userDealUsages UserDealUsage[]
+}
+
+model UserDealUsage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  accountId String   @db.ObjectId
+  dealId    String   @db.ObjectId
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usedAt    DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([accountId, dealId])
+}
+
+enum DealType {
+  FOOD    @map("Ăn uống")
+  FASHION @map("thời trang")
+  TRAVEL  @map("du lịch")
+  FINANCE @map("tài chính")
+}
+
+enum Emotion {
+  VERY_GOOD // Rất ngoan
+  GOOD // Ngoan
+  NORMAL // Bình thường
+  FUSSY // Nhõng nhẽo
+  VERY_FUSSY // Rất nhõng nhẽo
+}
+
+enum ToothStatus {
+  NOT_GROWN // Chưa mọc
+  GROWN // Đã mọc
+}
+
+enum JawPosition {
+  UPPER // Hàm trên
+  LOWER // Hàm dưới
+}
+
+enum EasyType {
+  DEFAULT // Mặc định
+  PUBLIC // Công khai khi tạo mới bởi người dùng
+  PRIVATE // Bí mật khi tạo mới bởi người dùng
+}
+
+enum EasyActivityType {
+  EAT // Ăn
+  ACTIVITY // Hoạt động
+  SLEEP // Ngủ
+  YOUR_TIME // Thời gian của mẹ
+  OTHER // Khác
+}
+
 enum MedicineUnit {
   PRESCRIPTION // Toa thuốc
   BLISTER // Viên nén
@@ -614,12 +816,13 @@ enum VaccineInjectionStatus {
 }
 
 enum FriendStatus {
-  PENDING
-  ACCEPTED
-  DECLINED
+  PENDING // Đang chờ xác nhận
+  ACCEPTED // Đã chấp nhận
+  DECLINED // Đã từ chối
 }
 
 enum CategoryType {
   RECIPE // Công thức nấu ăn
   ARTICLE // Cẩm nang
+  STORY // Truyện
 }

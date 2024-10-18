@@ -13,7 +13,10 @@ import { BabyTrackingModule } from './baby-tracking/baby-tracking.module'
 import { CategoriesModule } from './categories/categories.module'
 import { CommentsModule } from './comments/comments.module'
 import configurations from './configurations'
+import { DealsModule } from './deals/deals.module'
 import { EarlyEducationsModule } from './early-educations/early-educations.module'
+import { EasyModule } from './easy/easy.module'
+import { EmotionModule } from './emotion/emotion.module'
 import { FoodsModule } from './foods/foods.module'
 import { FriendsModule } from './friends/friends.module'
 import { GroupsModule } from './groups/groups.module'
@@ -23,6 +26,8 @@ import { OTPModule } from './otp/otp.module'
 import { PostsModule } from './posts/posts.module'
 import { RecipesModule } from './recipes/recipes.module'
 import { SmsModule } from './sms/sms.module'
+import { StoriesModule } from './stories/stories.module'
+import { TeethModule } from './teeth/teeth.module'
 import { UploadModule } from './upload/upload.module'
 import { UsersModule } from './users/users.module'
 import { VaccinesModule } from './vaccines/vaccines.module'
@@ -57,6 +62,11 @@ import { VaccinesModule } from './vaccines/vaccines.module'
     EarlyEducationsModule,
     FriendsModule,
     RecipesModule,
+    EasyModule,
+    TeethModule,
+    EmotionModule,
+    StoriesModule,
+    DealsModule,
   ],
   controllers: [AppController],
   providers: [

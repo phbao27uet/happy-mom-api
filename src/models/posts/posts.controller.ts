@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { PostsService } from './posts.service';
-import { Auth, GetCurrentId } from '@shared/decorators';
-import { DefaultFindAllQueryDto } from '@models/base';
-import { CreatePostDto, UpdatePostDto } from './dto';
-import { LikesService } from '@models/likes/likes.service';
-import { CommentsService } from '@models/comments/comments.service';
-import { CreateCommentDto } from '@models/comments/dto';
+import { DefaultFindAllQueryDto } from '@models/base'
+import { CommentsService } from '@models/comments/comments.service'
+import { CreateCommentDto } from '@models/comments/dto'
+import { LikesService } from '@models/likes/likes.service'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
+import { Auth, GetCurrentId } from '@shared/decorators'
+import { CreatePostDto, MoveGroupPostDto, UpdatePostDto } from './dto'
+import { PostsService } from './posts.service'
 
 @Controller('posts')
 export class PostsController {
@@ -18,25 +18,25 @@ export class PostsController {
   @Auth('USER', 'ADMIN')
   @Get('')
   async findAll(@Query() queryDto: DefaultFindAllQueryDto) {
-    return this.postsService.findAll(queryDto);
+    return this.postsService.findAll(queryDto)
   }
 
   @Auth('USER', 'ADMIN')
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.postsService.findOne(id);
+    return this.postsService.findOne(id)
   }
 
   @Auth('USER')
   @Get(':id/comments')
   async getComments(@Param('id') id: string) {
-    return this.commentsService.getCommentsByPostId(id);
+    return this.commentsService.getCommentsByPostId(id)
   }
 
   @Auth('USER')
   @Get(':id/likes')
   async getLikes(@Param('id') id: string) {
-    return this.likesService.getLikesByPostId(id);
+    return this.likesService.getLikesByPostId(id)
   }
 
   @Auth('USER')
@@ -45,7 +45,7 @@ export class PostsController {
     @GetCurrentId() currentId: string,
     @Body() createPostDto: CreatePostDto,
   ) {
-    return this.postsService.create(currentId, createPostDto);
+    return this.postsService.create(currentId, createPostDto)
   }
 
   @Auth('USER')
@@ -59,7 +59,7 @@ export class PostsController {
       authorId: currentId,
       postId: id,
       data: createCommentDto,
-    });
+    })
   }
 
   @Auth('USER')
@@ -72,18 +72,27 @@ export class PostsController {
       id,
       accountId: currentId,
       type: 'POST',
-    });
+    })
   }
 
-  @Auth('USER')
+  @Auth('USER', 'ADMIN')
   @Post(':id/remove')
   async remove(@Param('id') id: string) {
-    return this.postsService.remove(id);
+    return this.postsService.remove(id)
   }
 
   @Auth('USER')
   @Post(':id/update')
   async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(id, updatePostDto);
+    return this.postsService.update(id, updatePostDto)
+  }
+
+  @Auth('ADMIN')
+  @Post(':id/move-group')
+  async moveGroup(
+    @Param('id') id: string,
+    @Body() moveGroupPostDto: MoveGroupPostDto,
+  ) {
+    return this.postsService.moveGroup(id, moveGroupPostDto)
   }
 }

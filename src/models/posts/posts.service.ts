@@ -1,8 +1,8 @@
-import { DefaultFindAllQueryDto } from '@models/base';
-import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/shared/prisma/prisma.service';
-import { CreatePostDto } from './dto';
+import { DefaultFindAllQueryDto } from '@models/base'
+import { Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
+import { PrismaService } from 'src/shared/prisma/prisma.service'
+import { CreatePostDto, MoveGroupPostDto } from './dto'
 
 @Injectable()
 export class PostsService {
@@ -10,9 +10,9 @@ export class PostsService {
 
   async findAll(defaultFindAllQuery: DefaultFindAllQueryDto) {
     try {
-      const { perPage = 20, page = 1 } = defaultFindAllQuery;
+      const { perPage = 20, page = 1 } = defaultFindAllQuery
 
-      const where: Prisma.PostWhereInput = {};
+      const where: Prisma.PostWhereInput = {}
 
       const [total, data] = await Promise.all([
         this.prisma.post.count({
@@ -81,7 +81,7 @@ export class PostsService {
           skip: page && perPage ? (page - 1) * perPage : undefined,
           take: page && perPage ? perPage : undefined,
         }),
-      ]);
+      ])
 
       return {
         data: data,
@@ -91,9 +91,9 @@ export class PostsService {
           total: total ?? 0,
           totalPages: Math.ceil((total ?? 0) / perPage),
         },
-      };
+      }
     } catch (e) {
-      console.log(e);
+      console.log(e)
     }
   }
 
@@ -114,7 +114,7 @@ export class PostsService {
           },
         },
       },
-    });
+    })
   }
 
   async create(currentId: string, createPostDto: CreatePostDto) {
@@ -125,9 +125,9 @@ export class PostsService {
         groupId: createPostDto.groupId,
         authorId: currentId,
       },
-    });
+    })
 
-    return res;
+    return res
   }
 
   async remove(id: string) {
@@ -135,7 +135,7 @@ export class PostsService {
       where: {
         id,
       },
-    });
+    })
   }
 
   async update(id: string, updatePostDto: CreatePostDto) {
@@ -147,6 +147,17 @@ export class PostsService {
         images: updatePostDto.images,
         content: updatePostDto.content,
       },
-    });
+    })
+  }
+
+  async moveGroup(id: string, dto: MoveGroupPostDto) {
+    return this.prisma.post.update({
+      where: {
+        id,
+      },
+      data: {
+        groupId: dto.groupId,
+      },
+    })
   }
 }
