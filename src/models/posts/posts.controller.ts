@@ -2,7 +2,15 @@ import { DefaultFindAllQueryDto } from '@models/base'
 import { CommentsService } from '@models/comments/comments.service'
 import { CreateCommentDto } from '@models/comments/dto'
 import { LikesService } from '@models/likes/likes.service'
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common'
 import { Auth, GetCurrentId } from '@shared/decorators'
 import { CreatePostDto, MoveGroupPostDto, UpdatePostDto } from './dto'
 import { PostsService } from './posts.service'
@@ -78,6 +86,12 @@ export class PostsController {
   @Auth('USER', 'ADMIN')
   @Post(':id/remove')
   async remove(@Param('id') id: string) {
+    return this.postsService.remove(id)
+  }
+
+  @Auth('USER', 'ADMIN')
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
     return this.postsService.remove(id)
   }
 
