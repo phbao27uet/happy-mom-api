@@ -22,6 +22,7 @@ import { FriendsModule } from './friends/friends.module'
 import { GroupsModule } from './groups/groups.module'
 import { LikesModule } from './likes/likes.module'
 import { MedicinesModule } from './medicines/medicines.module'
+import { MenstrualCyclesModule } from './menstrual-cycles/menstrual-cycles.module'
 import { OTPModule } from './otp/otp.module'
 import { PostsModule } from './posts/posts.module'
 import { RecipesModule } from './recipes/recipes.module'
@@ -67,6 +68,7 @@ import { VaccinesModule } from './vaccines/vaccines.module'
     EmotionModule,
     StoriesModule,
     DealsModule,
+    MenstrualCyclesModule,
   ],
   controllers: [AppController],
   providers: [

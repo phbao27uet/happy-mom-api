@@ -11,32 +11,34 @@ datasource db {
 }
 
 model Account {
-  id                String             @id @default(auto()) @map("_id") @db.ObjectId
-  username          String             @unique
-  password          String
-  role              Role
-  pinCode           String?
-  isVerified        Boolean            @default(false)
-  refreshToken      String?
-  pushTokens        String[]           @default([])
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  user              User?
-  otps              OTP[]
-  posts             Post[]
-  likes             Like[]
-  comments          Comment[]
-  likeComments      LikeComment[]
-  participants      Participant[]
-  babyDiaries       BabyDiary[]
-  alarms            Alarm[]
+  id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+  username           String              @unique
+  password           String
+  role               Role
+  pinCode            String?
+  isVerified         Boolean             @default(false)
+  refreshToken       String?
+  pushTokens         String[]            @default([])
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  user               User?
+  otps               OTP[]
+  posts              Post[]
+  likes              Like[]
+  comments           Comment[]
+  likeComments       LikeComment[]
+  participants       Participant[]
+  babyDiaries        BabyDiary[]
+  alarms             Alarm[]
   // Friend feature
-  friends           Friend[]           @relation("AccountAsSender") // Danh sách bạn bè mà mình gửi lời mời
-  friendOf          Friend[]           @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
-  easies            Easy[]
-  easyActiveAccount EasyActiveAccount?
-  savedStories      SavedStory[]
-  userDealUsages    UserDealUsage[]
+  friends            Friend[]            @relation("AccountAsSender") // Danh sách bạn bè mà mình gửi lời mời
+  friendOf           Friend[]            @relation("AccountAsReceiver") // Danh sách bạn bè mà mình nhận lời mời
+  easies             Easy[]
+  easyActiveAccount  EasyActiveAccount?
+  savedStories       SavedStory[]
+  userDealUsages     UserDealUsage[]
+  menstrualCycles    MenstrualCycle[]
+  menstrualCycleLogs MenstrualCycleLog[]
 }
 
 model User {
@@ -662,6 +664,72 @@ model UserDealUsage {
   updatedAt DateTime @updatedAt
 
   @@unique([accountId, dealId])
+}
+
+model MenstrualCycle {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  accountId      String   @db.ObjectId
+  account        Account  @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  startDate      DateTime // Ngày bắt đầu chu kỳ
+  cycleDuration  Int // Chu kỳ kinh nguyệt (ngày) ~~ 28 ngày
+  periodDuration Int // Thời gian kinh nguyệt (ngày) ~~ 5 ngày
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model MenstrualCycleLog {
+  id       String                       @id @default(auto()) @map("_id") @db.ObjectId
+  date     DateTime
+  relation MenstrualCycleSexualActivity // Trạng thái quan hệ từ enum Relation
+  mood     MenstrualCycleMood // Tâm trạng từ enum Mood
+  status   MenstrualCycleStatus // Trạng thái cơ thể từ enum Status
+  note     String? // Ghi chú tùy chọn của người dùng
+
+  accountId String  @db.ObjectId
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum MenstrualCycleSexualActivity {
+  NO_ACTIVITY // Không có hoạt động tình dục
+  SAFE_SEX // Quan hệ tình dục an toàn
+  UNSAFE_SEX // Quan hệ tình dục không an toàn
+  MASTURBATION // Thủ dâm
+}
+
+enum MenstrualCycleMood {
+  CALM // Bình tĩnh
+  HAPPY // Vui vẻ
+  STRONG // Mạnh mẽ
+  ENTHUSIASTIC // Phấn chấn
+  NORMAL // Thất thường
+  FRUSTRATED // Bực bội
+  SAD // Buồn
+  WORRIED // Lo lắng
+  DEPRESSED // Trầm cảm
+  GUILTY // Cảm thấy có lỗi
+  CONFUSED // Bối rối
+  INDIFFERENT // Lãnh đạm
+  OBSESSED // Ám ảnh
+}
+
+enum MenstrualCycleStatus {
+  ALL_GOOD // Mọi thứ đều ổn
+  CRAMPS // Chuột rút
+  CHEST_PAIN // Đau ngực
+  HEADACHE // Đau đầu
+  PIMPLE // Nổi mụn
+  BACKACHE // Đau lưng
+  NAUSEA // Buồn nôn
+  TIRED // Mệt mỏi
+  BLOATING // Đầy hơi
+  THIRSTY // Khát nước
+  INSOMNIA // Mất ngủ
+  CONSTIPATION // Táo bón
+  DIGESTION_ISSUE // Rối loạn tiêu hoá
+  STOMACHACHE // Đau bụng
 }
 
 enum DealType {
