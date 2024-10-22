@@ -37,6 +37,7 @@ model Account {
   easyActiveAccount EasyActiveAccount?
   savedStories      SavedStory[]
   userDealUsages    UserDealUsage[]
+  menstrualCycles   MenstrualCycle[]
 }
 
 model User {
@@ -662,6 +663,88 @@ model UserDealUsage {
   updatedAt DateTime @updatedAt
 
   @@unique([accountId, dealId])
+}
+
+// Chu kỳ kinh nguyệt
+model MenstrualCycle {
+  id                   String       @id @default(auto()) @map("_id") @db.ObjectId
+  accountId            String       @db.ObjectId
+  account              Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  startDate            DateTime // Ngày bắt đầu chu kỳ
+  endDate              DateTime? // Ngày kết thúc chu kỳ (dự kiến)
+  cycleLength          Int // Độ dài chu kỳ (ngày)
+  menstruationDuration Int // Số ngày kinh nguyệt kéo dài
+  entries              CycleEntry[] // Danh sách các bản ghi chi tiết theo ngày
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+}
+
+// Bản ghi chu kỳ hàng ngày
+model CycleEntry {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  cycleId          String           @db.ObjectId
+  cycle            MenstrualCycle   @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  date             DateTime // Ngày ghi nhận
+  menstruationFlow MenstruationFlow // Lưu lượng kinh nguyệt
+  symptoms         SymptomOnEntry[] // Liên kết với triệu chứng
+  moods            MoodOnEntry[] // Liên kết với tâm trạng
+  sexualActivityId String?          @db.ObjectId
+  sexualActivity   SexualActivity?  @relation(fields: [sexualActivityId], references: [id]) // Quan hệ tình dục
+  notes            String? // Ghi chú thêm của người dùng (nếu có)
+}
+
+// Triệu chứng
+model Symptom {
+  id      String           @id @default(auto()) @map("_id") @db.ObjectId
+  name    String // Tên triệu chứng (ví dụ: đau bụng, đau lưng)
+  entries SymptomOnEntry[] // Liên kết với các bản ghi
+}
+
+// Tâm trạng
+model Mood {
+  id      String        @id @default(auto()) @map("_id") @db.ObjectId
+  name    String        @unique // Tên tâm trạng (ví dụ: vui vẻ, buồn bã, căng thẳng)
+  entries MoodOnEntry[] // Liên kết với các bản ghi
+}
+
+// Liên kết giữa Triệu chứng và Bản ghi
+model SymptomOnEntry {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  cycleEntryId String     @db.ObjectId
+  cycleEntry   CycleEntry @relation(fields: [cycleEntryId], references: [id], onDelete: Cascade)
+  symptomId    String     @db.ObjectId
+  symptom      Symptom    @relation(fields: [symptomId], references: [id], onDelete: Cascade)
+}
+
+// Liên kết giữa Tâm trạng và Bản ghi
+model MoodOnEntry {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  cycleEntryId String     @db.ObjectId
+  cycleEntry   CycleEntry @relation(fields: [cycleEntryId], references: [id], onDelete: Cascade)
+  moodId       String     @db.ObjectId
+  mood         Mood       @relation(fields: [moodId], references: [id], onDelete: Cascade)
+}
+
+// Quan hệ tình dục
+model SexualActivity {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  status       SexualStatus // Trạng thái quan hệ tình dục
+  notes        String? // Ghi chú thêm về hoạt động tình dục
+  cycleEntries CycleEntry[] // Liên kết với các bản ghi chu kỳ
+}
+
+enum SexualStatus {
+  NONE // Không có hoạt động tình dục nào được ghi nhận
+  SAFE // Quan hệ tình dục an toàn 
+  UNSAFE // Quan hệ tình dục không an toàn
+  SELF_PLEASURE // Tự sướng 
+}
+
+enum MenstruationFlow {
+  NONE // Không có kinh nguyệt
+  LIGHT // Lưu lượng kinh nguyệt nhẹ 
+  MEDIUM // Lưu lượng kinh nguyệt trung bình 
+  HEAVY // Lưu lượng kinh nguyệt nặng
 }
 
 enum DealType {

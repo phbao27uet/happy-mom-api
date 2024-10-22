@@ -5,6 +5,7 @@ import medicineSeed from './medicine.seed'
 import recipeSeed from './recipe.seed'
 import vaccineSeed from './story.seed'
 import toothSeed from './tooth.seed'
+import { moodSeed } from './mood.seed'
 
 const prisma = new PrismaClient()
 
@@ -880,6 +881,7 @@ async function main() {
   await recipeSeed()
   await toothSeed()
   await vaccineSeed()
+  await moodSeed()
 
   console.log('seed success')
 }
