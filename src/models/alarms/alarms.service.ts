@@ -1,21 +1,21 @@
+import { DefaultFindAllQueryDto } from '@models/base'
 import {
   Injectable,
   Logger,
   NotFoundException,
   OnModuleInit,
-} from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/shared/prisma/prisma.service';
-import { DefaultFindAllQueryDto } from '@models/base';
-import { CreateAlarmDto, UpdateAlarmDto } from './dto';
-import { isNil, omit } from 'lodash';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { NotificationService } from '@shared/notifications/notifications.service';
-import { CronJob } from 'cron';
+} from '@nestjs/common'
+import { SchedulerRegistry } from '@nestjs/schedule'
+import { Prisma } from '@prisma/client'
+import { NotificationService } from '@shared/notifications/notifications.service'
+import { CronJob } from 'cron'
+import { isNil, omit } from 'lodash'
+import { PrismaService } from 'src/shared/prisma/prisma.service'
+import { CreateAlarmDto, UpdateAlarmDto } from './dto'
 
 @Injectable()
 export class AlarmsService implements OnModuleInit {
-  private readonly logger = new Logger(AlarmsService.name);
+  private readonly logger = new Logger(AlarmsService.name)
 
   constructor(
     private readonly prisma: PrismaService,
@@ -24,172 +24,178 @@ export class AlarmsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.initializeAlarms();
+    await this.initializeAlarms()
   }
 
   private readonly _include: Prisma.AlarmInclude = {
     interval: true,
-  };
+  }
 
   async initializeAlarms() {
     const alarms = await this.prisma.alarm.findMany({
       where: { isActive: true },
       include: { interval: true, account: true },
-    });
+    })
 
     for (const alarm of alarms) {
-      await this.scheduleAlarm(alarm);
+      await this.scheduleAlarm(alarm)
     }
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   async scheduleAlarm(alarm: any) {
-    const jobName = `alarm_${alarm.id}`;
+    const jobName = `alarm_${alarm.id}`
 
-    this.deleteAlarmSchedule(alarm.id);
+    this.deleteAlarmSchedule(alarm.id)
 
-    let job: CronJob;
-    const now = new Date();
-    const alarmTime = new Date(alarm.time);
+    let job: CronJob
+    const now = new Date()
+    const alarmTime = new Date(alarm.time)
 
     switch (alarm.type) {
       case 'TIME':
-        if (alarm.interval && alarm.interval.minutes) {
+        if (alarm.interval?.minutes) {
           // Xử lý cho alarm lặp lại theo khoảng thời gian
-          const cronPattern = `*/${alarm.interval.minutes} * * * *`;
+          const cronPattern = `*/${alarm.interval.minutes} * * * *`
           job = new CronJob(cronPattern, () =>
             this.sendAlarmNotification(alarm),
-          );
+          )
 
           this.logger.debug(
             `Đã lên lịch cho alarm: ${jobName} loại: ${alarm.type} với pattern: ${cronPattern}`,
-          );
+          )
         } else {
           // Xử lý cho alarm một lần
           if (alarmTime > now) {
             job = new CronJob(alarmTime, () => {
-              this.sendAlarmNotification(alarm);
-              this.schedulerRegistry.deleteCronJob(jobName);
-            });
+              this.sendAlarmNotification(alarm)
+              this.schedulerRegistry.deleteCronJob(jobName)
+            })
 
             this.logger.debug(
               `Đã lên lịch cho alarm: ${jobName} loại: ${alarm.type} vào lúc: ${alarmTime}`,
-            );
+            )
           } else {
             this.logger.debug(
               `Alarm ${alarm.id} đã quá hạn và sẽ không được kích hoạt.`,
-            );
-            return; // Không lên lịch cho alarm đã quá hạn
+            )
+            return // Không lên lịch cho alarm đã quá hạn
           }
         }
-        break;
-      case 'HOUR_INTERVAL':
-        const cronPatternHour = `${alarmTime.getMinutes()} * * * *`;
+        break
+      case 'HOUR_INTERVAL': {
+        const cronPatternHour = `${alarmTime.getMinutes()} * * * *`
         // const cronPatternHour = `*/1 * * * *`; // For testing
 
         job = new CronJob(
           cronPatternHour,
           () => {
-            this.sendAlarmNotification(alarm);
+            this.sendAlarmNotification(alarm)
           },
           null,
           false,
           'UTC',
           null,
           false, // runOnInit = false
-        );
+        )
 
         this.logger.debug(
           `Đã lên lịch cho alarm HOUR_INTERVAL: ${jobName} loại: ${alarm.type} với pattern: ${cronPatternHour}`,
-        );
+        )
 
-        break;
-      case 'DAY_INTERVAL':
-        const cronPatternDay = `${alarmTime.getMinutes()} ${alarmTime.getHours()} * * *`;
+        break
+      }
+      case 'DAY_INTERVAL': {
+        const cronPatternDay = `${alarmTime.getMinutes()} ${alarmTime.getHours()} * * *`
 
         job = new CronJob(
           cronPatternDay,
           () => {
-            this.sendAlarmNotification(alarm);
+            this.sendAlarmNotification(alarm)
           },
           null,
           false,
           'UTC',
           null,
           false, // runOnInit = false
-        );
+        )
 
         this.logger.debug(
           `Đã lên lịch cho alarm DAY_INTERVAL: ${jobName} loại: ${alarm.type} với pattern: ${cronPatternDay}`,
-        );
-        break;
+        )
+        break
+      }
       default:
-        throw new Error('Loại alarm không hợp lệ');
+        throw new Error('Loại alarm không hợp lệ')
     }
 
     if (job) {
-      this.schedulerRegistry.addCronJob(jobName, job);
-      job.start();
+      this.schedulerRegistry.addCronJob(jobName, job)
+      job.start()
     }
   }
 
   async deleteAlarmSchedule(id: string) {
-    const jobName = `alarm_${id}`;
+    const jobName = `alarm_${id}`
 
     if (this.schedulerRegistry.doesExist('cron', jobName)) {
-      this.logger.debug(`Đã xóa lịch cho alarm: ${jobName}`);
-      this.schedulerRegistry.deleteCronJob(jobName);
+      this.logger.debug(`Đã xóa lịch cho alarm: ${jobName}`)
+      this.schedulerRegistry.deleteCronJob(jobName)
     }
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   async sendAlarmNotification(alarm: any) {
     const account = await this.prisma.account.findUnique({
       where: { id: alarm.accountId },
-    });
+    })
 
     console.log(
       `Gửi thông báo cho hoạt động: ${alarm.activity} ${alarm.type} cho tài khoản: ${account?.id}`,
-    );
+    )
 
     console.log({
       message: `Thông báo cho hoạt động: ${alarm.activity}`,
       alarm: omit(alarm, ['account']),
-    });
+    })
 
     if (!account || !account.pushTokens || account.pushTokens.length === 0) {
       console.error(
         `Không có token push hợp lệ cho tài khoản: ${alarm.accountId}`,
-      );
-      return;
+      )
+      return
     }
 
-    const message = `Thông báo cho hoạt động: ${alarm.activity}`;
+    const message = `Thông báo cho hoạt động: ${alarm.activity}`
     await this.notificationService.sendPushNotification(
       account.pushTokens,
       message,
       omit(alarm, ['account', 'interval']),
-    );
+    )
   }
 
   async findAllCron() {
     try {
-      const jobs = this.schedulerRegistry.getCronJobs();
+      const jobs = this.schedulerRegistry.getCronJobs()
 
-      const infor: any[] = [];
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      const infor: any[] = []
 
+      // biome-ignore lint/complexity/noForEach: <explanation>
       jobs.forEach((job) => {
         infor.push({
           name: job.cronTime.toString(),
-          cronPattern: job.cronTime.source + ' ' + job.cronTime.timeZone,
+          cronPattern: `${job.cronTime.source} ${job.cronTime.timeZone}`,
           running: job.running,
-        });
-      });
+        })
+      })
 
       return {
         size: jobs.size,
         jobs: infor,
-      };
+      }
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
   }
 
@@ -197,11 +203,11 @@ export class AlarmsService implements OnModuleInit {
     currentId: string,
     defaultFindAllQuery: DefaultFindAllQueryDto,
   ) {
-    const { perPage = 20, page = 1 } = defaultFindAllQuery;
+    const { perPage = 20, page = 1 } = defaultFindAllQuery
 
     const where: Prisma.AlarmWhereInput = {
       accountId: currentId,
-    };
+    }
 
     const [total, data] = await Promise.all([
       this.prisma.alarm.count({
@@ -218,7 +224,7 @@ export class AlarmsService implements OnModuleInit {
         skip: page && perPage ? (page - 1) * perPage : undefined,
         take: page && perPage ? perPage : undefined,
       }),
-    ]);
+    ])
 
     return {
       data: data,
@@ -228,7 +234,7 @@ export class AlarmsService implements OnModuleInit {
         total: total ?? 0,
         totalPages: Math.ceil((total ?? 0) / perPage),
       },
-    };
+    }
   }
 
   async findOne(id: string) {
@@ -239,11 +245,11 @@ export class AlarmsService implements OnModuleInit {
       include: {
         ...this._include,
       },
-    });
+    })
   }
 
   async create(currentId: string, createDto: CreateAlarmDto) {
-    const { interval, isRepeat, ...rest } = createDto;
+    const { interval, isRepeat, ...rest } = createDto
 
     const res = await this.prisma.alarm.create({
       data: {
@@ -266,13 +272,13 @@ export class AlarmsService implements OnModuleInit {
       include: {
         ...this._include,
       },
-    });
+    })
 
     if (res.isActive) {
-      await this.scheduleAlarm(res);
+      await this.scheduleAlarm(res)
     }
 
-    return res;
+    return res
   }
 
   async remove(id: string) {
@@ -283,11 +289,11 @@ export class AlarmsService implements OnModuleInit {
       include: {
         ...this._include,
       },
-    });
+    })
 
-    this.deleteAlarmSchedule(id);
+    this.deleteAlarmSchedule(id)
 
-    return res;
+    return res
   }
 
   /**
@@ -295,11 +301,11 @@ export class AlarmsService implements OnModuleInit {
    * @description Nếu không lặp lại thì xóa interval
    */
   async update(id: string, updateDto: UpdateAlarmDto) {
-    const { isRepeat, interval, ...rest } = updateDto;
+    const { isRepeat, interval, ...rest } = updateDto
 
     const intervalData: Prisma.AlarmUpdateInput = (() => {
       if (isNil(isRepeat) || (isRepeat && isNil(interval?.minutes))) {
-        return {};
+        return {}
       }
 
       if (!isRepeat) {
@@ -307,11 +313,11 @@ export class AlarmsService implements OnModuleInit {
           interval: {
             delete: true,
           },
-        };
+        }
       }
 
       if (isNil(interval?.minutes)) {
-        return {};
+        return {}
       }
 
       return {
@@ -328,8 +334,8 @@ export class AlarmsService implements OnModuleInit {
             },
           },
         },
-      };
-    })();
+      }
+    })()
 
     const res = await this.prisma.alarm.update({
       where: {
@@ -342,13 +348,13 @@ export class AlarmsService implements OnModuleInit {
       include: {
         ...this._include,
       },
-    });
+    })
 
     if (res.isActive) {
-      await this.scheduleAlarm(res);
+      await this.scheduleAlarm(res)
     }
 
-    return res;
+    return res
   }
 
   async toggle(id: string) {
@@ -356,10 +362,10 @@ export class AlarmsService implements OnModuleInit {
       where: {
         id,
       },
-    });
+    })
 
     if (!alarm) {
-      throw new NotFoundException('Không tìm thấy báo thức');
+      throw new NotFoundException('Không tìm thấy báo thức')
     }
 
     const res = await this.prisma.alarm.update({
@@ -372,14 +378,14 @@ export class AlarmsService implements OnModuleInit {
       include: {
         ...this._include,
       },
-    });
+    })
 
     if (res.isActive) {
-      await this.scheduleAlarm(res);
+      await this.scheduleAlarm(res)
     } else {
-      this.deleteAlarmSchedule(id);
+      this.deleteAlarmSchedule(id)
     }
 
-    return res;
+    return res
   }
 }
