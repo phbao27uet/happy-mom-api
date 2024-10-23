@@ -169,7 +169,7 @@ export class AuthService {
     return res;
   }
 
-  async logout(accountId: string): Promise<boolean> {
+  async logout(accountId: string, deviceId: string): Promise<boolean> {
     await this.prisma.account.updateMany({
       where: {
         id: accountId,
@@ -181,6 +181,9 @@ export class AuthService {
         refreshToken: null,
       },
     });
+
+    await this.devicesService.removeDeviceByAccountIdAndDeviceId(accountId, deviceId);
+    
     return true;
   }
 

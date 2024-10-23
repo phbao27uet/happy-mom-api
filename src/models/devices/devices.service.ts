@@ -42,13 +42,24 @@ export class DevicesService {
 
   async createOrUpdateDevice(accountId: string, deviceData: CreateDeviceDto): Promise<Device> {
     return this.prisma.device.upsert({
-      where: { accountId },
+      where: { deviceId: deviceData.deviceId }, 
       update: {
         ...deviceData,
+        lastLogin: new Date(), 
       },
       create: {
         ...deviceData,
         accountId,
+        lastLogin: new Date(),
+      },
+    });
+  }
+
+  async removeDeviceByAccountIdAndDeviceId(accountId: string, deviceId: string): Promise<void> {
+    await this.prisma.device.deleteMany({
+      where: {
+        accountId,
+        deviceId,
       },
     });
   }

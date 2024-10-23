@@ -21,7 +21,7 @@ import { RtGuard } from './guards/rt.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('login')
   async login(@Body() loginDto: CredentialsDto) {
@@ -34,8 +34,8 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@GetCurrentId() currentId: string) {
-    return this.authService.logout(currentId);
+  async logout(@GetCurrentId() currentId, @Body('deviceId') deviceId: string,) {
+    return this.authService.logout(currentId, deviceId);
   }
 
   @Post('forgot-password')
