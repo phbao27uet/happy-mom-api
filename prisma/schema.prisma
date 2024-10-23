@@ -678,11 +678,11 @@ model MenstrualCycle {
 }
 
 model MenstrualCycleLog {
-  id       String                       @id @default(auto()) @map("_id") @db.ObjectId
+  id       String                         @id @default(auto()) @map("_id") @db.ObjectId
   date     DateTime
-  relation MenstrualCycleSexualActivity // Trạng thái quan hệ từ enum Relation
-  mood     MenstrualCycleMood // Tâm trạng từ enum Mood
-  status   MenstrualCycleStatus // Trạng thái cơ thể từ enum Status
+  relation MenstrualCycleSexualActivity[] // Trạng thái quan hệ từ enum Relation
+  mood     MenstrualCycleMood[] // Tâm trạng từ enum Mood
+  status   MenstrualCycleStatus[] // Trạng thái cơ thể từ enum Status
   note     String? // Ghi chú tùy chọn của người dùng
 
   accountId String  @db.ObjectId
