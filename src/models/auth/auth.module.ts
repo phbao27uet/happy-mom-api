@@ -6,6 +6,7 @@ import { JWT_CONSTANTS } from 'src/shared/utils/constants';
 import { PrismaModule } from 'src/shared/prisma/prisma.module';
 import { OTPModule } from '@models/otp/otp.module';
 import { SmsModule } from '@models/sms/sms.module';
+import { DevicesService } from '@models/devices/devices.service';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { SmsModule } from '@models/sms/sms.module';
     OTPModule,
     SmsModule,
   ],
-  providers: [AuthService],
+  providers: [AuthService, DevicesService],
   controllers: [AuthController],
   exports: [AuthService],
 })

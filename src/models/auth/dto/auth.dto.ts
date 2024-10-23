@@ -13,6 +13,10 @@ const CredentialsSchema = z.object({
     .min(6, {
       message: 'Mật khẩu ít nhất 6 ký tự',
     }),
+  deviceName: z.string().optional(),
+  deviceType: z.string().optional(),
+  deviceId: z.string().optional(),
+  accessToken: z.string().optional(),
 });
 
-export class CredentialsDto extends createZodDto(CredentialsSchema) {}
+export class CredentialsDto extends createZodDto(CredentialsSchema) { }

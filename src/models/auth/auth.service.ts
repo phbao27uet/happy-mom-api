@@ -18,6 +18,7 @@ import { SmsService } from '@models/sms/sms.service';
 import { isMail } from '@shared/utils';
 import { omit, uniq } from 'lodash';
 import { Account, Prisma } from '@prisma/client';
+import { DevicesService } from '@models/devices/devices.service';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,8 @@ export class AuthService {
     private jwtService: JwtService,
     private otpService: OTPService,
     private smsService: SmsService,
-  ) {}
+    private devicesService: DevicesService,
+  ) { }
 
   private _select: Prisma.AccountSelect = {
     id: true,
@@ -88,6 +90,15 @@ export class AuthService {
       account.role,
     );
     await this.updateRtHash(account.id, tokens.refreshToken);
+
+    const deviceData = {
+      deviceName: dto.deviceName as string,
+      deviceType: dto.deviceType as string,
+      deviceId: dto.deviceId as string,
+      accessToken: tokens.accessToken as string,
+      accountId: account.id as string,
+    };
+    await this.devicesService.createOrUpdateDevice(account.id, deviceData);
 
     return { ...tokens, user: accountWithoutPassword };
   }

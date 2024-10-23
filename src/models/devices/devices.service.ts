@@ -5,7 +5,7 @@ import { CreateDeviceDto, UpdateDeviceDto } from './dto';
 
 @Injectable()
 export class DevicesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAllByAccount(accountId: string): Promise<Device[]> {
     return this.prisma.device.findMany({
@@ -37,6 +37,19 @@ export class DevicesService {
   async remove(id: string): Promise<Device> {
     return this.prisma.device.delete({
       where: { id },
+    });
+  }
+
+  async createOrUpdateDevice(accountId: string, deviceData: CreateDeviceDto): Promise<Device> {
+    return this.prisma.device.upsert({
+      where: { accountId },
+      update: {
+        ...deviceData,
+      },
+      create: {
+        ...deviceData,
+        accountId,
+      },
     });
   }
 }
