@@ -6,5 +6,5 @@ export interface ICycle {
     fertileStart: string
     fertileEnd: string
     ovulationDate: string
-  }
+  } | null
 }

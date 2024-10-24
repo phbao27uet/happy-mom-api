@@ -42,6 +42,38 @@ export class MenstrualCyclesService {
     const monthStart = startOfMonth(requestedMonth)
     const monthEnd = endOfMonth(requestedMonth)
 
+    // Kiểm tra xem tháng yêu cầu có phải là trong quá khứ không
+    if (monthEnd < new Date()) {
+      // Nếu là tháng trong quá khứ, lấy tất cả các chu kỳ thực tế
+      const actualCycles = await this.prisma.menstrualCycle.findMany({
+        where: {
+          accountId,
+          startDate: {
+            gte: monthStart,
+            lte: monthEnd,
+          },
+        },
+        orderBy: { startDate: 'asc' },
+      })
+
+      return {
+        month: format(requestedMonth, 'MM-yyyy'),
+        cycles: actualCycles.map((cycle) => ({
+          menstruationStartDate: format(cycle.startDate, 'dd/MM/yyyy'),
+          menstruationEndDate: format(
+            addDays(cycle.startDate, cycle.periodDuration - 1),
+            'dd/MM/yyyy',
+          ),
+          ovulationDate: format(
+            subDays(addDays(cycle.startDate, cycle.cycleDuration - 1), 14),
+            'dd/MM/yyyy',
+          ),
+          fertile: null,
+        })),
+      }
+    }
+
+    // Nếu không phải tháng trong quá khứ, giữ nguyên logic hiện tại
     const latestCycleInMonth = await this.getLatestUserCycle(
       accountId,
       monthStart,
@@ -56,7 +88,6 @@ export class MenstrualCyclesService {
 
     return {
       month: format(requestedMonth, 'MM-yyyy'),
-      latestCycleInMonth,
       cycles: cycles,
     }
   }
@@ -161,14 +192,15 @@ export class MenstrualCyclesService {
         isWithinInterval(currentDate, { start: monthStart, end: monthEnd }) ||
         isWithinInterval(cycleEndDate, { start: monthStart, end: monthEnd }) ||
         isWithinInterval(ovulationDate, { start: monthStart, end: monthEnd }) ||
-        isWithinInterval(parseISO(cycle.fertile.fertileStart), {
-          start: monthStart,
-          end: monthEnd,
-        }) ||
-        isWithinInterval(parseISO(cycle.fertile.fertileEnd), {
-          start: monthStart,
-          end: monthEnd,
-        })
+        (cycle.fertile &&
+          (isWithinInterval(parseISO(cycle.fertile.fertileStart), {
+            start: monthStart,
+            end: monthEnd,
+          }) ||
+            isWithinInterval(parseISO(cycle.fertile.fertileEnd), {
+              start: monthStart,
+              end: monthEnd,
+            })))
       ) {
         cycles.push(cycle)
       }
